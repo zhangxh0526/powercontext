@@ -179,9 +179,7 @@ def test_mixed_blocks_source_identity_and_exact_readback() -> None:
         )
 
         assert source.materialization is SourceMaterialization.CAPTURED
-        assert source.content == (
-            'assistant: 前文\n[tool_call 工具 调用] {"a":[1,{"a":1,"b":2}],"z":"汉字"}\n后文'
-        )
+        assert source.content == ('assistant: 前文\n[tool_call 工具 调用] {"a":[1,{"a":1,"b":2}],"z":"汉字"}\n后文')
         assert source.record == record
         assert await registry.read(source) == event
         assert source.name == (await registry.resolve(event)).name

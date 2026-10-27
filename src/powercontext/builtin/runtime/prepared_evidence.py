@@ -207,9 +207,11 @@ def _make_query(value: str, documents: Sequence[_Document]) -> _Query:
     for size in (2, 3):
         for index in range(len(raw_terms) - size + 1):
             phrase = raw_terms[index : index + size]
-            if all(term in query_terms and not _CJK_ANALYZER_TERM.fullmatch(term) for term in phrase):
-                if phrase not in phrases:
-                    phrases.append(phrase)
+            if (
+                all(term in query_terms and not _CJK_ANALYZER_TERM.fullmatch(term) for term in phrase)
+                and phrase not in phrases
+            ):
+                phrases.append(phrase)
     return _Query(
         terms=terms,
         stems=stems,
@@ -269,9 +271,11 @@ def _document_priority(document: _Document, query: _Query) -> float:
     matches = _match_strengths(query, exact_terms, stems)
     terms = tuple(term for sentence in document.sentences for term in sentence.terms)
     phrase_score = _phrase_score(_phrase_matches(terms, query), query)
-    return _weighted_coverage(matches, query.weights, query.total_weight) + 0.25 * _weighted_coverage(
-        matches, query.rarity_weights, query.total_rarity
-    ) + 0.5 * phrase_score
+    return (
+        _weighted_coverage(matches, query.weights, query.total_weight)
+        + 0.25 * _weighted_coverage(matches, query.rarity_weights, query.total_rarity)
+        + 0.5 * phrase_score
+    )
 
 
 def _score_span(document: _Document, span: _Span, query: _Query) -> _SpanScore:
@@ -296,9 +300,7 @@ def _score_span(document: _Document, span: _Span, query: _Query) -> _SpanScore:
     matched_weight = sum(weight * match for weight, match in zip(query.weights, matches, strict=True))
     consistency = (
         sum(
-            query.weights[index]
-            * match
-            * min(1.0, document.term_frequencies[query.stems[index]] / 3)
+            query.weights[index] * match * min(1.0, document.term_frequencies[query.stems[index]] / 3)
             for index, match in enumerate(matches)
         )
         / matched_weight
@@ -429,8 +431,7 @@ def _diverse_beam(states: Sequence[_State], document_count: int) -> list[_State]
             (
                 state
                 for state in by_score
-                if state.spans not in selected
-                and any(span.source_index == document_index for span in state.spans)
+                if state.spans not in selected and any(span.source_index == document_index for span in state.spans)
             ),
             None,
         )

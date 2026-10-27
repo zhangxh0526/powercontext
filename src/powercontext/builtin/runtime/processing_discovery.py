@@ -62,8 +62,7 @@ async def source_count_eligible_scopes(
     return frozenset(
         scope_id
         for scope_id in scope_ids
-        if positions.get(scope_id, 0)
-        - (0 if scope_id not in cursors else cursors[scope_id].cursor.sequence)
+        if positions.get(scope_id, 0) - (0 if scope_id not in cursors else cursors[scope_id].cursor.sequence)
         >= threshold
     )
 

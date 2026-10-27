@@ -49,8 +49,7 @@ def test_sends_exact_batches_and_globally_sorts_out_of_order_scores() -> None:
             200,
             json={
                 "scores": [
-                    {"rank": item["rank"], "score": scores[item["rank"]]}
-                    for item in reversed(body["candidates"])
+                    {"rank": item["rank"], "score": scores[item["rank"]]} for item in reversed(body["candidates"])
                 ]
             },
         )
@@ -120,7 +119,7 @@ def test_rejects_invalid_batch_size(batch_size) -> None:
 )
 def test_rejects_invalid_rerank_bounds_before_http(candidate_count, limit) -> None:
     def handler(_request: httpx.Request) -> httpx.Response:
-        raise AssertionError("invalid bounds must not issue an HTTP request")
+        raise AssertionError
 
     async def scenario() -> None:
         candidates = tuple(_hit(rank) for rank in range(1, candidate_count + 1))

@@ -43,11 +43,11 @@ class CoalescingEmbeddingModel:
         cache_size: int = 1024,
     ) -> None:
         if max_batch_size < 1:
-            raise ValueError("max_batch_size must be positive")
+            raise ValueError("max_batch_size must be positive")  # noqa: TRY003
         if coalesce_ms < 0:
-            raise ValueError("coalesce_ms must not be negative")
+            raise ValueError("coalesce_ms must not be negative")  # noqa: TRY003
         if cache_size < 0:
-            raise ValueError("cache_size must not be negative")
+            raise ValueError("cache_size must not be negative")  # noqa: TRY003
         self.profile = model.profile
         self._model = model
         self._max_batch_size = max_batch_size
@@ -120,14 +120,7 @@ class CoalescingEmbeddingModel:
                 self._pending_batch = None
             texts = tuple(batch.texts)
             result = await self._model.embed(texts)
-            if len(result.vectors) != len(texts):
-                raise ValueError("embedding model returned the wrong vector count")
-            if self._cache_size > 0:
-                for text, vector in zip(texts, result.vectors, strict=True):
-                    self._cache[text] = vector
-                    self._cache.move_to_end(text)
-                    if len(self._cache) > self._cache_size:
-                        self._cache.popitem(last=False)
+            self._cache_result(texts, result)
         except Exception as error:
             return error
         else:
@@ -139,6 +132,16 @@ class CoalescingEmbeddingModel:
             for text in batch.texts:
                 if self._inflight.get(text) is batch:
                     del self._inflight[text]
+
+    def _cache_result(self, texts: tuple[str, ...], result: EmbeddingResult) -> None:
+        if len(result.vectors) != len(texts):
+            raise ValueError("embedding model returned the wrong vector count")  # noqa: TRY003
+        if self._cache_size > 0:
+            for text, vector in zip(texts, result.vectors, strict=True):
+                self._cache[text] = vector
+                self._cache.move_to_end(text)
+                if len(self._cache) > self._cache_size:
+                    self._cache.popitem(last=False)
 
 
 def _token_total(values: list[int | None]) -> int | None:

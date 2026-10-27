@@ -101,6 +101,11 @@ class ArtifactProcessingPendingProvider(Protocol):
         ...
 
 
+def _validate_source_count_threshold(value: int | None) -> None:
+    if value is not None and (type(value) is not int or value < 1):
+        raise ValueError("source_count_threshold must be a positive integer")  # noqa: TRY003
+
+
 @dataclass(frozen=True, slots=True)
 class ArtifactProcessingBinding:
     """Startup registration of one Family and its independently budgeted Worker."""
@@ -133,10 +138,7 @@ class ArtifactProcessingBinding:
             raise ValueError("max_workers must be a positive integer")  # noqa: TRY003
         if self.worker_timeout_seconds <= 0:
             raise ValueError("worker_timeout_seconds must be positive")  # noqa: TRY003
-        if self.source_count_threshold is not None and (
-            type(self.source_count_threshold) is not int or self.source_count_threshold < 1
-        ):
-            raise ValueError("source_count_threshold must be a positive integer")  # noqa: TRY003
+        _validate_source_count_threshold(self.source_count_threshold)
         if self.automatic_processing_interval is not None:
             if self.automatic_processing_interval.total_seconds() <= 0:
                 raise ValueError("automatic interval must be positive")  # noqa: TRY003

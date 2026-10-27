@@ -130,7 +130,7 @@ def test_empty_primary_key_and_blank_primary_key_values_fail() -> None:
 
 def test_identity_uses_utf8_percent_encoding_and_bounds_the_encoded_length() -> None:
     assert (
-        csv_row_source_id("文档:α", "值 /%")
+        csv_row_source_id("文档:α", "值 /%")  # noqa: RUF001
         == "csv:%E6%96%87%E6%A1%A3%3A%CE%B1:%E5%80%BC%20%2F%25"
     )
 

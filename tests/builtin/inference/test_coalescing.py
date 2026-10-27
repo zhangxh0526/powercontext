@@ -22,7 +22,6 @@ from powercontext.builtin.artifacts.memory import EmbeddingProfile
 from powercontext.builtin.inference import EmbeddingResult, InferenceUsage
 from powercontext.builtin.inference.coalescing import CoalescingEmbeddingModel
 
-
 PROFILE = EmbeddingProfile(profile_id="coalescing-tests", model="offline", dimension=1)
 
 
