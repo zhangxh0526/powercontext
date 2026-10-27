@@ -14,6 +14,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 from typing import Any, cast
 
@@ -157,24 +158,26 @@ def test_empty_content_and_delta_round_trip() -> None:
     assert b"".join(rebuilt.items) == b""
 
 
-@pytest.mark.asyncio
-async def test_prepare_incremental_reuses_prepare_and_maps_none_to_empty(
+def test_prepare_incremental_reuses_prepare_and_maps_none_to_empty(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    application = object.__new__(ScopedContextApplication)
-    request = PrepareContextRequest(query="empty")
-    calls: list[PrepareContextRequest] = []
+    async def scenario() -> None:
+        application = object.__new__(ScopedContextApplication)
+        request = PrepareContextRequest(query="empty")
+        calls: list[PrepareContextRequest] = []
 
-    async def fake_prepare(received: PrepareContextRequest) -> PreparedContext:
-        calls.append(received)
-        return PreparedContext(status="empty", content=None, content_bytes=0)
+        async def fake_prepare(received: PrepareContextRequest) -> PreparedContext:
+            calls.append(received)
+            return PreparedContext(status="empty", content=None, content_bytes=0)
 
-    monkeypatch.setattr(application, "prepare", fake_prepare)
-    first = await application.prepare_incremental(request)
-    assert isinstance(first, ContextPack)
-    assert first.items == ()
-    second = await application.prepare_incremental(request, first)
-    assert isinstance(second, ContextPackDelta)
-    rebuilt = apply_context_pack_delta(first, second)
-    assert b"".join(rebuilt.items) == b""
-    assert calls == [request, request]
+        monkeypatch.setattr(application, "prepare", fake_prepare)
+        first = await application.prepare_incremental(request)
+        assert isinstance(first, ContextPack)
+        assert first.items == ()
+        second = await application.prepare_incremental(request, first)
+        assert isinstance(second, ContextPackDelta)
+        rebuilt = apply_context_pack_delta(first, second)
+        assert b"".join(rebuilt.items) == b""
+        assert calls == [request, request]
+
+    asyncio.run(scenario())
