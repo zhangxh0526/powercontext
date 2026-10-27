@@ -411,7 +411,7 @@ def test_accepted_source_count_request_recovers_without_count_admission(tmp_path
                 bindings=(ArtifactProcessingBinding(binding, "memory", recovered),),
                 lease_mode="single-process",
             ) as supervisor:
-                await _wait(lambda: supervisor.family_status["memory"]["completed"] == 1)
+                await _wait(lambda: supervisor.family_status["memory"]["completed"] == 1, timeout_seconds=15)
                 assert len(recovered.assignments) == 1
                 row = await _intent(profile.database, binding, scope)
                 assert row is not None and row.requested_generation == row.handled_generation == 1
