@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Bounded reconciliation of Source-driven Family progress at startup."""
+"""Bounded Source-driven Family discovery and startup reconciliation."""
 
 from __future__ import annotations
 
@@ -43,6 +43,29 @@ async def enabled_profile_scopes(connection: AsyncConnection, scope_ids: tuple[s
         .with_for_update()
     )
     return frozenset(rows)
+
+
+async def source_count_eligible_scopes(
+    connection: AsyncConnection,
+    binding_name: str,
+    scope_ids: tuple[str, ...],
+    threshold: int,
+) -> frozenset[str]:
+    """Compare one bounded page of journal heads with this binding's successful cursors."""
+
+    if not scope_ids:
+        return frozenset()
+    heads = SOURCE_JOURNAL_HEADS_TABLE
+    rows = await connection.execute(select(heads.c.scope_id, heads.c.position).where(heads.c.scope_id.in_(scope_ids)))
+    positions = {str(scope_id): int(position) for scope_id, position in rows}
+    cursors = await SourceCursorRepository().load_many(connection, scope_ids, binding_name)
+    return frozenset(
+        scope_id
+        for scope_id in scope_ids
+        if positions.get(scope_id, 0)
+        - (0 if scope_id not in cursors else cursors[scope_id].cursor.sequence)
+        >= threshold
+    )
 
 
 class SourceProcessingPendingProvider:

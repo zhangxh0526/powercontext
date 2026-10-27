@@ -489,23 +489,26 @@ class ScopedSourceApplication:
                             span.set_attributes({_MEMORY_CAPTURE_SOURCE_COUNT: 1})
             except BaseValueConflictError as error:
                 raise SourceConflictError("identity", error.identity) from None
-            return SourceReceipt(
+            receipt = SourceReceipt(
                 source_ref=SourceRef(source_type=record.source_type, source_id=record.source_id),
                 sequence=record.position,
             )
-        async with self._runtime._context(self.scope_id) as context:
-            with self._runtime._stage(_MEMORY_CAPTURE_STAGE, attributes={}) as span:
-                source, sequence = await context.sources.capture(
-                    ContentCapture(
-                        source_id=value.source_id,
-                        content=value.content,
-                        metadata=value.model_dump(mode="json")["metadata"],
-                    ),
-                    handoff_receipt=handoff_receipt,
-                )
-                if span is not None:
-                    span.set_attributes({_MEMORY_CAPTURE_SOURCE_COUNT: 1})
-            return SourceReceipt(source_ref=context.sources.catalog.as_ref(source), sequence=sequence)
+        else:
+            async with self._runtime._context(self.scope_id) as context:
+                with self._runtime._stage(_MEMORY_CAPTURE_STAGE, attributes={}) as span:
+                    source, sequence = await context.sources.capture(
+                        ContentCapture(
+                            source_id=value.source_id,
+                            content=value.content,
+                            metadata=value.model_dump(mode="json")["metadata"],
+                        ),
+                        handoff_receipt=handoff_receipt,
+                    )
+                    if span is not None:
+                        span.set_attributes({_MEMORY_CAPTURE_SOURCE_COUNT: 1})
+                receipt = SourceReceipt(source_ref=context.sources.catalog.as_ref(source), sequence=sequence)
+        self._runtime._wake_source_count_processing()
+        return receipt
 
 
 class SourceApplication:
@@ -532,11 +535,13 @@ class ScopedRecordApplication:
         /,
     ) -> SourceRecord:
         async with self._runtime._scope_operation(self.scope_id), self._runtime._locked(self.scope_id):
-            return await self._runtime._records().create_source(
+            record = await self._runtime._records().create_source(
                 self.scope_id,
                 source_type,
                 content,
             )
+        self._runtime._wake_source_count_processing()
+        return record
 
     async def get_source(self, source_type: str, source_id: str, /) -> SourceRecord:
         async with self._runtime._scope_operation(self.scope_id):
@@ -564,7 +569,9 @@ class ScopedRecordApplication:
         /,
     ) -> ArtifactCreated:
         async with self._runtime._scope_operation(self.scope_id), self._runtime._locked(self.scope_id):
-            return await self._runtime._records().create_artifact(self.scope_id, family, write)
+            created = await self._runtime._records().create_artifact(self.scope_id, family, write)
+        self._runtime._wake_source_count_processing()
+        return created
 
     async def get_artifact(self, family: str, artifact_id: str, /) -> ArtifactRecord:
         async with self._runtime._scope_operation(self.scope_id):
@@ -647,13 +654,15 @@ class ScopedRecordApplication:
         /,
     ) -> ArtifactRecord:
         async with self._runtime._scope_operation(self.scope_id), self._runtime._locked(self.scope_id):
-            return await self._runtime._records().replace_artifact(
+            record = await self._runtime._records().replace_artifact(
                 self.scope_id,
                 family,
                 artifact_id,
                 expected_etag,
                 write,
             )
+        self._runtime._wake_source_count_processing()
+        return record
 
 
 class RecordApplication:
@@ -724,7 +733,9 @@ class RemoteIngestionApplication:
 
     async def submit(self, request: SubmitSourceObservation, /) -> SourceReceipt:
         async with self._runtime._scope_operation(request.scope_id):
-            return await self._require_service().submit_source_observation(request)
+            receipt = await self._require_service().submit_source_observation(request)
+        self._runtime._wake_source_count_processing()
+        return receipt
 
     async def commit(self, request: CommitConnectorCheckpoint, /) -> ConnectorCheckpointState:
         async with self._runtime._scope_operation(request.binding.scope_id):
@@ -2992,6 +3003,7 @@ class BuiltinRuntime:
         capabilities: RuntimeCapabilities,
         code_service: CodeService | None = None,
         source_window_limit: int = 100,
+        source_count_bindings: Sequence[str] = (),
         context_assembly_max_entries: int = 8,
         recall_sufficiency_policy: RecallSufficiencyPolicy | None = None,
         scope_cache_size: int = DEFAULT_SCOPE_CACHE_SIZE,
@@ -3096,6 +3108,7 @@ class BuiltinRuntime:
         self._scheduled_source_runner = scheduled_source_runner
         self._scheduled_experience_runner = scheduled_experience_runner
         self.source_window_limit = source_window_limit
+        self._source_count_bindings = tuple(source_count_bindings)
         self.context_assembly_max_entries = context_assembly_max_entries
         self.recall_sufficiency_policy = recall_sufficiency_policy
         self._scope_cache = ScopeCache(
@@ -3298,6 +3311,26 @@ class BuiltinRuntime:
                 self._scheduler = None
             self._scope_cache.clear()
             self._closed = True
+
+    def _wake_source_count_processing(self) -> None:
+        supervisor = self.artifact_processing_supervisor
+        if supervisor is None:
+            return
+        for binding_name in self._source_count_bindings:
+            try:
+                supervisor.wake(binding_name)
+            except Exception as error:
+                log_safely(
+                    logger,
+                    logging.WARNING,
+                    "Source count supervisor wake failed after Source commit",
+                    exc_info=error,
+                    extra={
+                        "event": "source.count_trigger.wake_failed",
+                        "outcome": "committed",
+                        "binding": binding_name,
+                    },
+                )
 
     @asynccontextmanager
     async def _operation(self) -> AsyncIterator[None]:

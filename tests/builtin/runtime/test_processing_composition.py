@@ -216,6 +216,29 @@ def test_schedule_and_worker_budgets_can_change_without_maintenance(tmp_path: Pa
     asyncio.run(scenario())
 
 
+def test_source_count_thresholds_compose_independent_family_bindings(tmp_path: Path) -> None:
+    async def scenario() -> None:
+        config = BuiltinConfig(
+            database=_sqlite(tmp_path / "count-bindings.db"),
+            inference=InferenceConfig(generation_model="test"),
+            runtime=RuntimeConfig(
+                artifact_processing_families=("memory", "topic-memory"),
+                memory_source_count_threshold=2,
+                topic_memory_source_count_threshold=3,
+            ),
+        )
+        async with open_builtin_contexts(config) as contexts:
+            bindings = composition._artifact_processing_bindings(config, contexts, ())
+        by_family = {binding.artifact_family: binding for binding in bindings}
+        assert {family: binding.source_count_threshold for family, binding in by_family.items()} == {
+            "memory": 2,
+            "topic-memory": 3,
+        }
+        assert all(binding.automatic_processing_interval is None for binding in bindings)
+
+    asyncio.run(scenario())
+
+
 def test_processing_capabilities_accept_minimax_embedding_but_not_generation() -> None:
     embedding = BuiltinConfig(
         inference=InferenceConfig(

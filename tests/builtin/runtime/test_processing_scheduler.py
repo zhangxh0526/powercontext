@@ -20,7 +20,9 @@ from collections import Counter
 from datetime import timedelta
 
 import pytest
+from sqlalchemy import insert, update
 
+from powercontext.builtin.persistence.cursors import SourceCursorRepository
 from powercontext.builtin.persistence.errors import ArtifactProcessingLeadershipLostError
 from powercontext.builtin.persistence.processing_intents import ArtifactProcessingIntentRepository
 from powercontext.builtin.persistence.sqlite import SQLiteConfig, SQLiteProfile
@@ -28,13 +30,14 @@ from powercontext.builtin.persistence.supervision import (
     ArtifactProcessingBindingStateRepository,
     ArtifactProcessingLeaseRepository,
 )
-from powercontext.builtin.persistence.tables import SHARED_TABLES
+from powercontext.builtin.persistence.tables import SHARED_TABLES, SOURCE_JOURNAL_HEADS_TABLE
 from powercontext.builtin.runtime import artifact_processing as processing
 from powercontext.builtin.runtime.artifact_processing import ArtifactProcessingBinding, ArtifactProcessingSupervisor
 from powercontext.builtin.runtime.processing_contracts import (
     ArtifactProcessingWorkerCompletion,
     ArtifactProcessingWorkerOutcome,
 )
+from powercontext.builtin.sources import SourceCursor
 
 
 async def _wait(predicate, timeout_seconds=5):
@@ -67,6 +70,23 @@ async def _request(database, binding, scope, *, dirty=True, requested=True):
 async def _intent(database, binding, scope):
     async with database.transaction() as connection:
         return await ArtifactProcessingIntentRepository().load(connection, scope, binding)
+
+
+async def _set_source_head(database, scope, position):
+    async with database.transaction() as connection:
+        result = await connection.execute(
+            update(SOURCE_JOURNAL_HEADS_TABLE)
+            .where(SOURCE_JOURNAL_HEADS_TABLE.c.scope_id == scope)
+            .values(position=position)
+        )
+        if result.rowcount == 0:
+            await connection.execute(insert(SOURCE_JOURNAL_HEADS_TABLE).values(scope_id=scope, position=position))
+
+
+async def _cursor_sequence(database, binding, scope):
+    async with database.transaction() as connection:
+        cursor = await SourceCursorRepository().load(connection, scope, binding)
+    return 0 if cursor is None else cursor.cursor.sequence
 
 
 class _Launcher:
@@ -312,6 +332,89 @@ def test_automatic_scan_is_bounded_and_excludes_new_registration_until_next_sche
                 assert {work.scope_id for work in launcher.assignments} == {"a", "b", "c", "d", "e"}
                 assert (await _intent(profile.database, "memory-binding", "late")).requested_generation == 0
                 assert all(options["limit"] <= 2 for _, options in observed.scans)
+
+    asyncio.run(scenario())
+
+
+def test_source_count_backlog_rechecks_cursor_without_draining(tmp_path):
+    async def scenario():
+        async with _profile(tmp_path, "count-backlog") as profile:
+            binding = "memory-binding"
+            scope = "scope"
+            await _request(profile.database, binding, scope, requested=False)
+            await _set_source_head(profile.database, scope, 7)
+
+            async def advance_two_sources(work):
+                cursors = SourceCursorRepository()
+                async with profile.database.transaction() as connection:
+                    current = await cursors.load(connection, work.scope_id, work.binding_name, for_update=True)
+                    sequence = 0 if current is None else current.cursor.sequence
+                    await cursors.save(
+                        connection,
+                        work.scope_id,
+                        work.binding_name,
+                        SourceCursor(sequence=sequence + 2),
+                        expected_generation=None if current is None else current.generation,
+                    )
+
+            launcher = _Launcher(profile.database, on_work=advance_two_sources)
+            async with ArtifactProcessingSupervisor(
+                database=profile.database,
+                bindings=(ArtifactProcessingBinding(binding, "memory", launcher, source_count_threshold=3),),
+                lease_mode="single-process",
+            ) as supervisor:
+                await _wait(lambda: supervisor.family_status["memory"]["completed"] >= 3)
+                assert len(launcher.assignments) == 3
+                assert await _cursor_sequence(profile.database, binding, scope) == 6
+                await asyncio.sleep(0.05)
+                assert len(launcher.assignments) == 3
+
+                await _set_source_head(profile.database, scope, 9)
+                await _request(profile.database, binding, scope, requested=False)
+                supervisor.wake(binding)
+                await _wait(lambda: supervisor.family_status["memory"]["completed"] >= 4)
+                assert len(launcher.assignments) == 4
+                assert await _cursor_sequence(profile.database, binding, scope) == 8
+                await asyncio.sleep(0.05)
+                assert len(launcher.assignments) == 4
+                row = await _intent(profile.database, binding, scope)
+                assert row is not None and row.requested_generation == row.handled_generation == 4
+
+    asyncio.run(scenario())
+
+
+def test_accepted_source_count_request_recovers_without_count_admission(tmp_path):
+    async def scenario():
+        async with _profile(tmp_path, "count-recovery") as profile:
+            binding = "memory-binding"
+            scope = "scope"
+            await _request(profile.database, binding, scope, requested=False)
+            await _set_source_head(profile.database, scope, 2)
+
+            async def fail(_work):
+                raise RuntimeError
+
+            failing = _Launcher(profile.database, on_work=fail)
+            async with ArtifactProcessingSupervisor(
+                database=profile.database,
+                bindings=(ArtifactProcessingBinding(binding, "memory", failing, source_count_threshold=2),),
+                lease_mode="single-process",
+                retry_base_seconds=60,
+            ) as supervisor:
+                await _wait(lambda: supervisor.family_status["memory"]["failed"] == 1)
+                row = await _intent(profile.database, binding, scope)
+                assert row is not None and row.requested_generation == 1 and row.handled_generation == 0
+
+            recovered = _Launcher(profile.database)
+            async with ArtifactProcessingSupervisor(
+                database=profile.database,
+                bindings=(ArtifactProcessingBinding(binding, "memory", recovered),),
+                lease_mode="single-process",
+            ) as supervisor:
+                await _wait(lambda: supervisor.family_status["memory"]["completed"] == 1)
+                assert len(recovered.assignments) == 1
+                row = await _intent(profile.database, binding, scope)
+                assert row is not None and row.requested_generation == row.handled_generation == 1
 
     asyncio.run(scenario())
 
