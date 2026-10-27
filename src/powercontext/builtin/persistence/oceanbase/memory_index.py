@@ -109,15 +109,22 @@ WITH fts_candidates AS (
     ORDER BY fts_score DESC, f.memory_artifact_id, f.entry_id, f.entry_version_id
     LIMIT :candidate_limit
 ),
-vector_candidates AS (
+vector_neighbors AS (
     SELECT m.scope_id, m.memory_artifact_id, m.entry_id, m.entry_version_id,
            l2_distance(m.embedding, :query_vector) AS distance
     FROM pc_memory_vector_entries AS m
     WHERE m.scope_id = :scope_id
       AND m.memory_artifact_id IN :memory_artifact_ids
-      {vector_tag_filter}
     ORDER BY l2_distance(m.embedding, :query_vector) {approximate}
-    LIMIT :candidate_limit
+    {ann_limit_clause}
+),
+vector_candidates AS (
+    SELECT n.scope_id, n.memory_artifact_id, n.entry_id, n.entry_version_id, n.distance
+    FROM vector_neighbors AS n
+    WHERE TRUE
+      {vector_tag_filter}
+    ORDER BY n.distance
+    {vector_final_limit}
 )
 SELECT 'fts' AS source_channel, h.memory_artifact_id, h.head_revision,
        h.entry_id, h.entry_version_id, v.text, f.fts_score, NULL AS distance
@@ -342,6 +349,8 @@ class OceanBaseMemoryVectorIndex:
                 fts_tag_filter="",
                 vector_tag_filter="",
                 approximate="APPROXIMATE",
+                ann_limit_clause="LIMIT :candidate_limit",
+                vector_final_limit="",
             )
         ).bindparams(
             bindparam("memory_artifact_ids", expanding=True),
@@ -350,8 +359,10 @@ class OceanBaseMemoryVectorIndex:
         self._tagged_hybrid_search_sql = text(
             _OCEANBASE_HYBRID_SEARCH_SQL.format(
                 fts_tag_filter=memory_tag_sql("f"),
-                vector_tag_filter=memory_tag_sql("m"),
-                approximate="",
+                vector_tag_filter=memory_tag_sql("n"),
+                approximate="APPROXIMATE",
+                ann_limit_clause="LIMIT :ann_limit",
+                vector_final_limit="LIMIT :candidate_limit",
             )
         ).bindparams(
             bindparam("memory_artifact_ids", expanding=True),
@@ -449,7 +460,10 @@ class OceanBaseMemoryVectorIndex:
             return MemorySearchChannels()
         if request.embedding_profile != self.profile or request.query_vector is None:
             raise CapabilityNotSupportedError("embedding-profile")
-        if not await self.vector_complete(connection, scope_id, request.memories, self.profile):
+        complete, vector_row_count = await self._vector_complete_with_count(
+            connection, scope_id, request.memories, self.profile
+        )
+        if not complete:
             raise CapabilityNotSupportedError("vector")
         statement = self._search_sql if request.tag_filter is None else self._tagged_search_sql
         parameters = {
@@ -465,6 +479,8 @@ class OceanBaseMemoryVectorIndex:
         if request.mode == "hybrid":
             statement = self._hybrid_search_sql if request.tag_filter is None else self._tagged_hybrid_search_sql
             parameters["analyzed_query"] = request.analyzed_query
+            if request.tag_filter is not None:
+                parameters["ann_limit"] = vector_row_count
         rows = (await connection.execute(statement, parameters)).mappings()
         if request.mode == "hybrid":
             hybrid_rows = tuple(rows)
@@ -488,8 +504,20 @@ class OceanBaseMemoryVectorIndex:
         profile: EmbeddingProfile,
         /,
     ) -> bool:
+        complete, _ = await self._vector_complete_with_count(connection, scope_id, memories, profile)
+        return complete
+
+    async def _vector_complete_with_count(
+        self,
+        connection: AsyncConnection,
+        scope_id: str,
+        memories: tuple[ArtifactRef, ...],
+        profile: EmbeddingProfile,
+        /,
+    ) -> tuple[bool, int]:
         if profile != self.profile:
-            return False
+            return False, 0
+        vector_row_count = 0
         for memory in memories:
             current = await connection.scalar(
                 select(ARTIFACT_HEADS_TABLE.c.revision).where(
@@ -527,13 +555,14 @@ class OceanBaseMemoryVectorIndex:
                     )
                 )
             ).all()
+            vector_row_count += len(metadata)
             expected = {(str(row[0]), str(row[1]), str(row[2])) for row in heads}
             actual = {(str(row[0]), str(row[1]), str(row[2])) for row in metadata}
             if actual != expected:
-                return False
+                return False, vector_row_count
             if any(str(row[3]) != _embedding_hash(self.profile, str(row[2])) for row in metadata):
-                return False
-        return True
+                return False, vector_row_count
+        return True, vector_row_count
 
     async def hydrate(
         self,

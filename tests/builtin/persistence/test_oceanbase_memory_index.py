@@ -86,7 +86,7 @@ def test_oceanbase_hybrid_executes_one_statement_and_restores_channels() -> None
         vector = OceanBaseMemoryVectorIndex(_PROFILE)
         index = CompositeMemoryIndex(OceanBaseMemoryFTSIndex(), vector)
 
-        with patch.object(vector, "vector_complete", new=AsyncMock(return_value=True)):
+        with patch.object(vector, "_vector_complete_with_count", new=AsyncMock(return_value=(True, 41))):
             channels = await index.search(cast(AsyncConnection, connection), "scope-a", _request("hybrid"))
 
         assert connection.execute.await_count == 1
@@ -125,14 +125,14 @@ def test_oceanbase_hybrid_executes_one_statement_and_restores_channels() -> None
     asyncio.run(scenario())
 
 
-def test_oceanbase_tagged_hybrid_filters_each_channel_before_exact_top_k() -> None:
+def test_oceanbase_tagged_hybrid_covers_vectors_before_final_top_k() -> None:
     async def scenario() -> None:
         connection = AsyncMock(spec=AsyncConnection)
         connection.execute.return_value.mappings = MagicMock(return_value=[])
         vector = OceanBaseMemoryVectorIndex(_PROFILE)
         tag_filter = TagFilter(tags=("selected",))
 
-        with patch.object(vector, "vector_complete", new=AsyncMock(return_value=True)):
+        with patch.object(vector, "_vector_complete_with_count", new=AsyncMock(return_value=(True, 41))):
             channels = await vector.search(
                 cast(AsyncConnection, connection),
                 "scope-a",
@@ -145,7 +145,8 @@ def test_oceanbase_tagged_hybrid_filters_each_channel_before_exact_top_k() -> No
         assert statement.count("pc_artifact_tags") == 2
         assert statement.count("tag_key_hash IN") == 2
         assert statement.count("LIMIT :candidate_limit") == 2
-        assert "APPROXIMATE" not in statement
+        assert "APPROXIMATE" in statement
+        assert parameters["ann_limit"] == 41
         vector_limit = statement.index("LIMIT :candidate_limit", statement.index("vector_candidates AS"))
         vector_selection = statement[statement.index("vector_candidates AS") : vector_limit]
         assert "pc_artifact_tags" in vector_selection
@@ -165,7 +166,7 @@ def test_oceanbase_single_channel_searches_keep_their_legacy_statements() -> Non
         vector = OceanBaseMemoryVectorIndex(_PROFILE)
 
         fts_channels = await fts.search(cast(AsyncConnection, connection), "scope-a", _request("fts"))
-        with patch.object(vector, "vector_complete", new=AsyncMock(return_value=True)):
+        with patch.object(vector, "_vector_complete_with_count", new=AsyncMock(return_value=(True, 41))):
             vector_channels = await vector.search(cast(AsyncConnection, connection), "scope-a", _request("vector"))
 
         assert connection.execute.await_count == 2
