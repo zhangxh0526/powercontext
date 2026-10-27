@@ -34,6 +34,7 @@ from powercontext.builtin.runtime.prepared_code import (
     PreparedCodeCandidate,
     assemble_code,
 )
+from powercontext.builtin.runtime.prepared_evidence import EvidenceSource, select_evidence
 from powercontext.builtin.runtime.prepared_text import (
     TRUST_POLICY,
     ContextTextItem,
@@ -96,6 +97,7 @@ class PreparedContextOmissions:
 class PreparedContextBuild:
     """Final public context and the exact origins selected to produce it.
 
+    Evidence-selection fragments, origins, and rendered items have the same order and length.
     ``omissions`` is always filled by the Builder. The RFC 1560 recall trace is deliberately
     **not** a field here: ``ScopedContextApplication._prepare`` returns ``build.context`` and
     discards the rest, so such a field would have no production observer. The trace is
@@ -106,6 +108,7 @@ class PreparedContextBuild:
     origins: tuple[PreparedContextOrigin, ...]
     omissions: PreparedContextOmissions = PreparedContextOmissions()
     code_origins: tuple[CodeEvidenceRef, ...] = ()
+    fragments: tuple[PreparedContextFragment, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -115,6 +118,16 @@ class MemoryEntryAddress:
     memory: ArtifactAddress
     entry_id: str
     entry_version_id: str
+
+
+@dataclass(frozen=True)
+class PreparedContextFragment:
+    """One literal, half-open character range from an exact Memory entry version."""
+
+    address: MemoryEntryAddress
+    start: int
+    end: int
+    text: str
 
 
 PreparedContextOrigin = MemoryCitation | ArtifactRef | MemoryEntryAddress | ArtifactAddress
@@ -146,7 +159,7 @@ class PreparedProfileCandidate:
 
 
 class PreparedContextBuilder:
-    """Select and render final context without I/O, persistence, or reranking."""
+    """Select and render final context without I/O or persistence."""
 
     memory_candidate_limit = 16
     topic_memory_candidate_limit = 8
@@ -211,7 +224,7 @@ class PreparedContextBuilder:
         profile_candidates: Sequence[PreparedProfileCandidate] = (),
         code_candidates: Sequence[PreparedCodeCandidate] = (),
     ) -> PreparedContextBuild:
-        if request.include_code:
+        if request.include_code and not request.evidence_selection:
 
             def historical(history_request: PrepareContextRequest, entries: int) -> PreparedContextBuild:
                 builder = PreparedContextBuilder()
@@ -230,12 +243,13 @@ class PreparedContextBuilder:
 
         if sum(len(candidates.hits) for candidates in memory_candidates) > self.memory_candidate_limit:
             raise PreparedContextInvariantError("memory-candidate-limit")
-        if len(topic_memory_hits) > self.topic_memory_candidate_limit:
-            raise PreparedContextInvariantError("topic-memory-candidate-limit")
-        if sum(len(candidates.hits) for candidates in experience_candidates) > self.experience_candidate_limit:
-            raise PreparedContextInvariantError("experience-candidate-limit")
+        if not request.evidence_selection:
+            if len(topic_memory_hits) > self.topic_memory_candidate_limit:
+                raise PreparedContextInvariantError("topic-memory-candidate-limit")
+            if sum(len(candidates.hits) for candidates in experience_candidates) > self.experience_candidate_limit:
+                raise PreparedContextInvariantError("experience-candidate-limit")
 
-        content, origins, omissions = self._select_entries(
+        content, origins, omissions, fragments = self._select_entries(
             request=request,
             current_scope_id=current_scope_id,
             memory_candidates=memory_candidates,
@@ -246,14 +260,15 @@ class PreparedContextBuilder:
         if content is None:
             return PreparedContextBuild(context=self.empty(), origins=(), omissions=omissions)
         content_bytes = len(content.encode("utf-8"))
-        # The assembly path is bounded by construction (every fitted item is measured against
-        # `max_bytes`), so the ceiling check belongs to the non-assembly renderer only.
-        if request.assembly is None and content_bytes > request.max_bytes:
+        # Assembly and evidence selection are bounded by their final renderers; the ordinary
+        # non-assembly path retains its defensive ceiling check here.
+        if (request.assembly is None or request.evidence_selection) and content_bytes > request.max_bytes:
             raise PreparedContextInvariantError("output-budget")
         return PreparedContextBuild(
             context=PreparedContext(status="ready", content=content, content_bytes=content_bytes),
             origins=origins,
             omissions=omissions,
+            fragments=fragments,
         )
 
     def probe_budget(
@@ -277,7 +292,7 @@ class PreparedContextBuilder:
         counters because both go through :meth:`_select_entries`.
         """
 
-        content, origins, omissions = self._select_entries(
+        content, origins, omissions, _ = self._select_entries(
             request=request,
             current_scope_id=current_scope_id,
             memory_candidates=memory_candidates,
@@ -303,17 +318,18 @@ class PreparedContextBuilder:
         topic_memory_hits: Sequence[TopicMemorySearchHit],
         experience_candidates: Sequence[PreparedExperienceCandidates],
         profile_candidates: Sequence[PreparedProfileCandidate],
-    ) -> tuple[str | None, tuple[PreparedContextOrigin, ...], PreparedContextOmissions]:
-        """Run one complete pure selection pass and render it.
+    ) -> tuple[
+        str | None,
+        tuple[PreparedContextOrigin, ...],
+        PreparedContextOmissions,
+        tuple[PreparedContextFragment, ...],
+    ]:
+        """Run the one pure selection and rendering pass shared by build and budget probe."""
 
-        Returns ``(content, origins, omissions)``; ``content`` is ``None`` exactly when nothing
-        was selected, which is the empty-result case for both paths. This is the single
-        selection path shared by :meth:`build_scopes_result` and :meth:`probe_budget`, so the
-        probe's counters always describe the selection the build would actually perform.
-        """
-
+        if request.evidence_selection:
+            return self._select_evidence(request, current_scope_id, memory_candidates)
         if request.assembly is not None:
-            return self._select_text(
+            content, origins, omissions = self._select_text(
                 request,
                 current_scope_id=current_scope_id,
                 memory_candidates=memory_candidates,
@@ -321,6 +337,7 @@ class PreparedContextBuilder:
                 profile_candidates=profile_candidates,
                 topic_memory_hits=topic_memory_hits,
             )
+            return content, origins, omissions, ()
 
         memory_entries = _interleave_groups(
             tuple(
@@ -344,8 +361,87 @@ class PreparedContextBuilder:
         )[: self.experience_entry_limit]
         entries, omissions = self._fit_entries(request, memory_entries, topic_memory_entries, experience_entries)
         if not entries:
-            return None, (), omissions
-        return _render(entries), tuple(entry.origin for entry in entries), omissions
+            return None, (), omissions, ()
+        return _render(entries), tuple(entry.origin for entry in entries), omissions, ()
+
+    def _select_evidence(
+        self,
+        request: PrepareContextRequest,
+        current_scope_id: str | None,
+        memory_candidates: Sequence[PreparedMemoryCandidates],
+    ) -> tuple[
+        str | None,
+        tuple[PreparedContextOrigin, ...],
+        PreparedContextOmissions,
+        tuple[PreparedContextFragment, ...],
+    ]:
+        sources = self._evidence_sources(current_scope_id, memory_candidates)
+        selection = select_evidence(request.query, sources, request.max_bytes, max_items=self.entry_limit)
+        fragments = []
+        for span in selection.spans:
+            source = sources[span.source_index]
+            address = MemoryEntryAddress(
+                memory=ArtifactAddress(scope_id=source.scope_id, artifact=source.memory_ref),
+                entry_id=source.entry_id,
+                entry_version_id=source.entry_version_id,
+            )
+            fragments.append(
+                PreparedContextFragment(
+                    address=address,
+                    start=span.start,
+                    end=span.end,
+                    text=source.text[span.start : span.end],
+                )
+            )
+        omissions = PreparedContextOmissions(
+            dropped_items=selection.dropped_items,
+            dropped_no_fitting_truncation=selection.dropped_items,
+        )
+        return (
+            selection.content,
+            tuple(fragment.address for fragment in fragments),
+            omissions,
+            tuple(fragments),
+        )
+
+    def _evidence_sources(
+        self,
+        current_scope_id: str | None,
+        memory_candidates: Sequence[PreparedMemoryCandidates],
+    ) -> tuple[EvidenceSource, ...]:
+        groups = []
+        for candidates in memory_candidates:
+            scope_id = candidates.scope_id or current_scope_id
+            if candidates.hits and not scope_id:
+                raise PreparedContextInvariantError("memory-scope-missing")
+            groups.append(self._memory_entries(candidates.memory_ref, candidates.hits, scope_id=scope_id))
+        sources = []
+        seen = set()
+        for entry in _interleave_groups(groups):
+            origin = entry.origin
+            if not isinstance(origin, MemoryEntryAddress):
+                raise PreparedContextInvariantError("memory-scope-missing")
+            identity = (
+                origin.memory.scope_id,
+                origin.memory.artifact.family,
+                origin.memory.artifact.artifact_id,
+                origin.memory.artifact.revision,
+                origin.entry_id,
+                origin.entry_version_id,
+            )
+            if identity in seen:
+                continue
+            seen.add(identity)
+            sources.append(
+                EvidenceSource(
+                    scope_id=origin.memory.scope_id,
+                    memory_ref=origin.memory.artifact,
+                    entry_id=origin.entry_id,
+                    entry_version_id=origin.entry_version_id,
+                    text=entry.content,
+                )
+            )
+        return tuple(sources)
 
     def _select_text(
         self,
