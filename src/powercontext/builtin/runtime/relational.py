@@ -152,6 +152,7 @@ from powercontext.builtin.persistence.recurrence import RecurrenceRepository
 from powercontext.builtin.persistence.skill_packages import SkillPackageRepository
 from powercontext.builtin.persistence.skill_publications import SkillPublicationRepository
 from powercontext.builtin.persistence.source_definitions import SourceDefinitionManifestRepository
+from powercontext.builtin.persistence.source_lifecycle import SourceLifecycleRepository
 from powercontext.builtin.persistence.sources import SourceRepository, StoredSource
 from powercontext.builtin.persistence.statistics import StatisticsRepository
 from powercontext.builtin.persistence.supervision import (
@@ -190,6 +191,7 @@ from powercontext.builtin.runtime.protocols import (
 )
 from powercontext.builtin.runtime.recall import RelationalRecallTokenEstimator
 from powercontext.builtin.runtime.recurrence import RelationalRecurrenceLedger
+from powercontext.builtin.runtime.source_lifecycle import RelationalSourceLifecycle
 from powercontext.builtin.runtime.statistics import RelationalScopedStatistics
 from powercontext.builtin.scope import ScopeApplication
 from powercontext.builtin.scope.subject_sources import SubjectSourceService
@@ -770,6 +772,22 @@ class RelationalContexts:
         """Return product statistics bound to one scope."""
 
         return self._services_for(scope_id).statistics()
+
+    def lifecycle(self, scope_id: str, /) -> RelationalSourceLifecycle:
+        services = self._services_for(scope_id)
+
+        def memory_service(connection: AsyncConnection) -> MemoryService:
+            _, source_catalog = services.sources(connection)
+            return services.memory(source_catalog, connection)
+
+        return RelationalSourceLifecycle(
+            database=self.database,
+            scope_id=services.scope_id,
+            repository=SourceLifecycleRepository(),
+            sources=services.repositories.sources,
+            topic_memories=services.repositories.topic_memories,
+            memory_service=memory_service,
+        )
 
     def model_usage_reporter(
         self, scope_id: str, /

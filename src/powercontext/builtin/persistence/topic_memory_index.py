@@ -33,7 +33,11 @@ from powercontext.builtin.artifacts.topic_memory import (
     TopicMemorySearchRequest,
     TopicMemoryStorageInvariantError,
 )
-from powercontext.builtin.persistence.tables import TOPIC_MEMORY_ACTIVE_CHUNKS_TABLE, TOPIC_MEMORY_ACTIVE_TOPICS_TABLE
+from powercontext.builtin.persistence.tables import (
+    SOURCE_LIFECYCLE_NODES_TABLE,
+    TOPIC_MEMORY_ACTIVE_CHUNKS_TABLE,
+    TOPIC_MEMORY_ACTIVE_TOPICS_TABLE,
+)
 
 
 class TopicMemoryIndex(Protocol):
@@ -210,6 +214,29 @@ def _combine_retrieved(left: int | None, right: int | None) -> int | None:
     return (left or 0) + (right or 0)
 
 
+def topic_memory_generation_filter(
+    scope_id: str,
+    artifact_id: ColumnElement[str],
+    revision: ColumnElement[int],
+) -> ColumnElement[bool]:
+    registered = SOURCE_LIFECYCLE_NODES_TABLE.alias("source_lifecycle_registered")
+    available = SOURCE_LIFECYCLE_NODES_TABLE.alias("source_lifecycle_available")
+    registered_row = select(registered.c.node_id).where(
+        registered.c.scope_id == scope_id,
+        registered.c.kind == "topic",
+        registered.c.artifact_id == artifact_id,
+        registered.c.artifact_revision == revision,
+    )
+    available_row = select(available.c.node_id).where(
+        available.c.scope_id == scope_id,
+        available.c.kind == "topic",
+        available.c.artifact_id == artifact_id,
+        available.c.artifact_revision == revision,
+        available.c.available.is_(True),
+    )
+    return or_(~registered_row.exists(), available_row.exists())
+
+
 async def validate_current_topic_vectors(
     connection: AsyncConnection,
     topic_vectors: Table,
@@ -305,4 +332,5 @@ __all__ = [
     "NoTopicMemoryIndex",
     "TopicMemoryIndex",
     "topic_memory_embedding_profile_fingerprint",
+    "topic_memory_generation_filter",
 ]

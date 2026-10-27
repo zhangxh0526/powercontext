@@ -147,40 +147,79 @@ _INSERT_CHUNK_FTS_SQL = text(
          :title, :summary, :chunk_text, :searchable_text)
     """
 )
+
+
+def _sqlite_generation_filter(table_name: str, *, cast_revision: bool = False) -> str:
+    revision = "CAST({table_name}.revision AS INTEGER)" if cast_revision else "{table_name}.revision"
+    template = """
+        AND (
+            NOT EXISTS (
+                SELECT 1 FROM pc_source_lifecycle_nodes AS registered
+                WHERE registered.scope_id = {table_name}.scope_id
+                  AND registered.kind = 'topic'
+                  AND registered.artifact_id = {table_name}.artifact_id
+                  AND registered.artifact_revision = {revision}
+            )
+            OR EXISTS (
+                SELECT 1 FROM pc_source_lifecycle_nodes AS available
+                WHERE available.scope_id = {table_name}.scope_id
+                  AND available.kind = 'topic'
+                  AND available.artifact_id = {table_name}.artifact_id
+                  AND available.artifact_revision = {revision}
+                  AND available.available = 1
+            )
+        )
+    """
+    return template.replace("{revision}", revision).replace("{table_name}", table_name)
+
+
 _SEARCH_TOPIC_FTS_SQL = """
     WITH scored AS (
         SELECT artifact_id, revision, title, summary,
                bm25(pc_topic_memory_topic_fts) AS score, ({coverage}) AS coverage
         FROM pc_topic_memory_topic_fts
         WHERE pc_topic_memory_topic_fts MATCH :query AND scope_id = :scope_id
+        {source_lifecycle_filter}
     )
     SELECT artifact_id, revision, title, summary
     FROM scored
     WHERE coverage >= :required_matches
     ORDER BY score, artifact_id, revision DESC
     LIMIT :candidate_limit
-    """
+    """.replace(
+    "{source_lifecycle_filter}",
+    _sqlite_generation_filter("pc_topic_memory_topic_fts", cast_revision=True),
+)
 _COUNT_TOPIC_FTS_SQL = """
     SELECT count(*)
     FROM pc_topic_memory_topic_fts
     WHERE pc_topic_memory_topic_fts MATCH :query AND scope_id = :scope_id
-    """
+    {source_lifecycle_filter}
+    """.replace(
+    "{source_lifecycle_filter}",
+    _sqlite_generation_filter("pc_topic_memory_topic_fts", cast_revision=True),
+)
 _COUNT_TOPIC_FTS_ELIGIBLE_SQL = """
     WITH scored AS (
         SELECT ({coverage}) AS coverage
         FROM pc_topic_memory_topic_fts
         WHERE pc_topic_memory_topic_fts MATCH :query AND scope_id = :scope_id
+        {source_lifecycle_filter}
     )
     SELECT count(*)
     FROM scored
     WHERE coverage >= :required_matches
-    """
+    """.replace(
+    "{source_lifecycle_filter}",
+    _sqlite_generation_filter("pc_topic_memory_topic_fts", cast_revision=True),
+)
 _SEARCH_CHUNK_FTS_SQL = """
     WITH scored AS (
         SELECT artifact_id, revision, title, summary, chunk_ordinal, start_offset, chunk_text,
                bm25(pc_topic_memory_chunk_fts) AS score, ({coverage}) AS coverage
         FROM pc_topic_memory_chunk_fts
         WHERE pc_topic_memory_chunk_fts MATCH :query AND scope_id = :scope_id
+        {source_lifecycle_filter}
     ), ranked AS (
         SELECT scored.*,
                row_number() OVER (
@@ -194,13 +233,17 @@ _SEARCH_CHUNK_FTS_SQL = """
     WHERE topic_rank = 1 AND coverage >= :required_matches
     ORDER BY score, artifact_id, revision DESC, chunk_ordinal
     LIMIT :candidate_limit
-    """
+    """.replace(
+    "{source_lifecycle_filter}",
+    _sqlite_generation_filter("pc_topic_memory_chunk_fts", cast_revision=True),
+)
 _COUNT_CHUNK_FTS_SQL = """
     WITH scored AS (
         SELECT artifact_id, revision, title, summary, chunk_ordinal, start_offset, chunk_text,
                bm25(pc_topic_memory_chunk_fts) AS score, ({coverage}) AS coverage
         FROM pc_topic_memory_chunk_fts
         WHERE pc_topic_memory_chunk_fts MATCH :query AND scope_id = :scope_id
+        {source_lifecycle_filter}
     ), ranked AS (
         SELECT scored.*,
                row_number() OVER (
@@ -212,13 +255,17 @@ _COUNT_CHUNK_FTS_SQL = """
     SELECT count(*)
     FROM ranked
     WHERE topic_rank = 1
-    """
+    """.replace(
+    "{source_lifecycle_filter}",
+    _sqlite_generation_filter("pc_topic_memory_chunk_fts", cast_revision=True),
+)
 _COUNT_CHUNK_FTS_ELIGIBLE_SQL = """
     WITH scored AS (
         SELECT artifact_id, revision, chunk_ordinal,
                bm25(pc_topic_memory_chunk_fts) AS score, ({coverage}) AS coverage
         FROM pc_topic_memory_chunk_fts
         WHERE pc_topic_memory_chunk_fts MATCH :query AND scope_id = :scope_id
+        {source_lifecycle_filter}
     ), ranked AS (
         SELECT scored.*,
                row_number() OVER (
@@ -230,7 +277,10 @@ _COUNT_CHUNK_FTS_ELIGIBLE_SQL = """
     SELECT count(*)
     FROM ranked
     WHERE topic_rank = 1 AND coverage >= :required_matches
-    """
+    """.replace(
+    "{source_lifecycle_filter}",
+    _sqlite_generation_filter("pc_topic_memory_chunk_fts", cast_revision=True),
+)
 
 _DELETE_TOPIC_VECTOR_SQL = text("DELETE FROM pc_topic_memory_topic_vec WHERE rowid = :vector_id")
 _DELETE_CHUNK_VECTOR_SQL = text("DELETE FROM pc_topic_memory_chunk_vec WHERE rowid = :vector_id")
@@ -254,6 +304,7 @@ _TOPIC_VECTOR_SEARCH_SQL = text(
           AND rowid IN (
               SELECT vector_id FROM pc_topic_memory_vector_topics
               WHERE scope_id = :scope_id AND profile_fingerprint = :profile_fingerprint
+              {source_lifecycle_filter}
           )
     )
     SELECT a.artifact_id, a.revision, a.title, a.summary, nearest.distance
@@ -264,7 +315,10 @@ _TOPIC_VECTOR_SEARCH_SQL = text(
     WHERE v.scope_id = :scope_id
     ORDER BY nearest.distance, a.artifact_id, a.revision DESC
     LIMIT :candidate_limit
-    """
+    """.replace(
+        "{source_lifecycle_filter}",
+        _sqlite_generation_filter("pc_topic_memory_vector_topics"),
+    )
 )
 _CHUNK_VECTOR_SEARCH_SQL = text(
     """
@@ -274,6 +328,7 @@ _CHUNK_VECTOR_SEARCH_SQL = text(
           AND rowid IN (
               SELECT vector_id FROM pc_topic_memory_vector_chunks
               WHERE scope_id = :scope_id AND profile_fingerprint = :profile_fingerprint
+              {source_lifecycle_filter}
           )
     ), ranked AS (
         SELECT a.artifact_id, a.revision, a.title, a.summary,
@@ -297,7 +352,10 @@ _CHUNK_VECTOR_SEARCH_SQL = text(
     WHERE topic_rank = 1
     ORDER BY distance, artifact_id, revision DESC, chunk_ordinal
     LIMIT :candidate_limit
-    """
+    """.replace(
+        "{source_lifecycle_filter}",
+        _sqlite_generation_filter("pc_topic_memory_vector_chunks"),
+    )
 )
 
 

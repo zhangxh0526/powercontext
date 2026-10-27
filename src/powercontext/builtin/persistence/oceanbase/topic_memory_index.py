@@ -60,6 +60,7 @@ from powercontext.builtin.persistence.tables import (
 )
 from powercontext.builtin.persistence.topic_memory_index import (
     topic_memory_embedding_profile_fingerprint,
+    topic_memory_generation_filter,
     validate_current_topic_vectors,
 )
 from powercontext.limits import MAX_ARTIFACT_ID_LENGTH, MAX_SCOPE_ID_LENGTH
@@ -83,6 +84,31 @@ _VECTOR_TYPE_SQL = text(
     WHERE table_schema = DATABASE() AND table_name = :table_name AND column_name = 'embedding'
     """
 )
+
+
+def _mysql_generation_filter(alias: str) -> str:
+    template = """
+      AND (
+          NOT EXISTS (
+              SELECT 1 FROM pc_source_lifecycle_nodes AS registered
+              WHERE registered.scope_id = {alias}.scope_id
+                AND registered.kind = 'topic'
+                AND registered.artifact_id = {alias}.artifact_id
+                AND registered.artifact_revision = {alias}.revision
+          )
+          OR EXISTS (
+              SELECT 1 FROM pc_source_lifecycle_nodes AS available
+              WHERE available.scope_id = {alias}.scope_id
+                AND available.kind = 'topic'
+                AND available.artifact_id = {alias}.artifact_id
+                AND available.artifact_revision = {alias}.revision
+                AND available.available = 1
+          )
+      )
+    """
+    return template.replace("{alias}", alias)
+
+
 # Keep ANN selection join-free: CE 4.3.5.6 can lose neighbors when its
 # distance-ordered vector scan participates directly in a merge join.
 # The LIMIT boundary precedes active-head hydration and Topic collapse.
@@ -93,6 +119,7 @@ WITH candidates AS (
     FROM pc_topic_memory_vector_topics AS v
     WHERE v.scope_id = :scope_id
       AND v.profile_fingerprint = :profile_fingerprint
+      {source_lifecycle_filter}
     ORDER BY l2_distance(v.embedding, :query_vector) APPROXIMATE
     LIMIT :candidate_limit
 )
@@ -101,7 +128,7 @@ FROM candidates AS n
 JOIN pc_topic_memory_active_topics AS a
   ON a.scope_id = n.scope_id AND a.artifact_id = n.artifact_id AND a.revision = n.revision
 ORDER BY distance, artifact_id, revision DESC
-"""
+""".replace("{source_lifecycle_filter}", _mysql_generation_filter("v"))
 _CHUNK_VECTOR_SEARCH = """
 WITH neighbors AS (
     SELECT v.scope_id, v.artifact_id, v.revision, v.chunk_ordinal,
@@ -109,6 +136,7 @@ WITH neighbors AS (
     FROM pc_topic_memory_vector_chunks AS v
     WHERE v.scope_id = :scope_id
       AND v.profile_fingerprint = :profile_fingerprint
+      {source_lifecycle_filter}
     ORDER BY l2_distance(v.embedding, :query_vector) APPROXIMATE
     LIMIT :neighbor_limit
 ), ranked AS (
@@ -131,7 +159,7 @@ FROM ranked
 WHERE topic_rank = 1
 ORDER BY distance, artifact_id, revision DESC, chunk_ordinal
 LIMIT :candidate_limit
-"""
+""".replace("{source_lifecycle_filter}", _mysql_generation_filter("v"))
 
 
 class OceanBaseTopicMemoryFTSIndex:
@@ -180,12 +208,18 @@ class OceanBaseTopicMemoryFTSIndex:
             query_terms,
             coverage_required,
         )
+        topic_available = topic_memory_generation_filter(
+            scope_id,
+            TOPIC_MEMORY_ACTIVE_TOPICS_TABLE.c.artifact_id,
+            TOPIC_MEMORY_ACTIVE_TOPICS_TABLE.c.revision,
+        )
         topic_retrieved = await connection.scalar(
             select(func.count())
             .select_from(TOPIC_MEMORY_ACTIVE_TOPICS_TABLE)
             .where(
                 TOPIC_MEMORY_ACTIVE_TOPICS_TABLE.c.scope_id == scope_id,
                 topic_score,
+                topic_available,
             )
         )
         topic_eligible = await connection.scalar(
@@ -194,6 +228,7 @@ class OceanBaseTopicMemoryFTSIndex:
             .where(
                 TOPIC_MEMORY_ACTIVE_TOPICS_TABLE.c.scope_id == scope_id,
                 topic_score,
+                topic_available,
                 topic_coverage,
             )
         )
@@ -208,6 +243,7 @@ class OceanBaseTopicMemoryFTSIndex:
                 .where(
                     TOPIC_MEMORY_ACTIVE_TOPICS_TABLE.c.scope_id == scope_id,
                     topic_score,
+                    topic_available,
                     topic_coverage,
                 )
                 .order_by(
@@ -259,6 +295,7 @@ class OceanBaseTopicMemoryFTSIndex:
             .where(
                 TOPIC_MEMORY_ACTIVE_CHUNKS_TABLE.c.scope_id == scope_id,
                 chunk_score,
+                topic_available,
             )
             .subquery()
         )
