@@ -35,6 +35,7 @@ from powercontext.sources.connectors import ConnectorLifecycle
 from powercontext.sources.pi_session import (
     PI_EVENT_SOURCE_DEFINITION,
     PiEventInput,
+    PiEventSource,
     PiSessionConnector,
     PiSessionInput,
     parse_pi_session,
@@ -111,7 +112,7 @@ async def _run(path: Path, sink: _MemorySink, checkpoints: _Checkpoints, leaf_id
 
 
 def test_default_leaf_is_the_last_graph_node_not_the_last_visible_event() -> None:
-    records = [
+    records: list[dict[str, object]] = [
         _message("root", None, "selected ancestor"),
         _message("other", None, "later visible event on another branch"),
         {"type": "model_change", "id": "tail-control", "parentId": "root"},
@@ -125,7 +126,7 @@ def test_default_leaf_is_the_last_graph_node_not_the_last_visible_event() -> Non
 
 
 def test_unselected_branch_is_still_fully_validated() -> None:
-    records = [
+    records: list[dict[str, object]] = [
         _message("selected", None, "valid selected branch"),
         {"type": "model_change", "id": "broken", "parentId": "future"},
         {"type": "model_change", "id": "future", "parentId": "selected"},
@@ -172,6 +173,7 @@ def test_mixed_blocks_source_identity_and_exact_readback() -> None:
     async def scenario() -> None:
         registry = SourceDefinitionRegistry((PI_EVENT_SOURCE_DEFINITION,))
         source = await registry.resolve(event)
+        assert isinstance(source, PiEventSource)
         projection = registry.project(source, TEXT_EVIDENCE_PROJECTION_KEY)
         other = await registry.resolve(event.model_copy(update={"session_id": "other"}))
         long_identity = await registry.resolve(
@@ -202,7 +204,7 @@ def test_mixed_blocks_source_identity_and_exact_readback() -> None:
 
 def test_failed_run_replays_durable_prefix_without_advancing_checkpoint(tmp_path: Path) -> None:
     path = tmp_path / "session.jsonl"
-    records = [_message("a", None, "A"), _message("b", "a", "B"), _message("c", "b", "C")]
+    records: list[dict[str, object]] = [_message("a", None, "A"), _message("b", "a", "B"), _message("c", "b", "C")]
     path.write_bytes(_archive(records))
     sink = _MemorySink()
     sink.fail_event_id = "b"
@@ -231,7 +233,7 @@ def test_failed_run_replays_durable_prefix_without_advancing_checkpoint(tmp_path
 
 def test_full_record_mutation_is_rejected_before_any_new_submission(tmp_path: Path) -> None:
     path = tmp_path / "session.jsonl"
-    records = [_message("a", None, "A"), _message("b", "a", "B")]
+    records: list[dict[str, object]] = [_message("a", None, "A"), _message("b", "a", "B")]
     records[1]["provider"] = {"unprojected": "original"}
     path.write_bytes(_archive(records))
     sink = _MemorySink()
@@ -262,7 +264,7 @@ def test_full_record_mutation_is_rejected_before_any_new_submission(tmp_path: Pa
 
 def test_making_an_imported_event_invisible_still_counts_as_mutation(tmp_path: Path) -> None:
     path = tmp_path / "session.jsonl"
-    records = [_message("a", None, "captured")]
+    records: list[dict[str, object]] = [_message("a", None, "captured")]
     path.write_bytes(_archive(records))
     sink = _MemorySink()
     checkpoints = _Checkpoints()
@@ -283,7 +285,7 @@ def test_making_an_imported_event_invisible_still_counts_as_mutation(tmp_path: P
 
 def test_rejected_new_event_keeps_old_progress_until_retry(tmp_path: Path) -> None:
     path = tmp_path / "session.jsonl"
-    records = [_message("a", None, "A")]
+    records: list[dict[str, object]] = [_message("a", None, "A")]
     path.write_bytes(_archive(records))
     sink = _MemorySink()
     checkpoints = _Checkpoints()

@@ -41,7 +41,9 @@ from powercontext.sources import SourceRef
 
 
 async def _scope(runtime: BuiltinRuntime, key: str) -> str:
-    scope = await runtime.scopes.create(ScopeDraft(title="Lifecycle", summary="Source evidence", idempotency_key=key))
+    scopes = runtime.scopes
+    assert scopes is not None
+    scope = await scopes.create(ScopeDraft(title="Lifecycle", summary="Source evidence", idempotency_key=key))
     return scope.scope_id
 
 
@@ -119,7 +121,7 @@ def test_source_lifecycle_event_validation_is_strict() -> None:
         {"extra": True},
     ):
         with pytest.raises(ValidationError):
-            SourceLifecycleEvent(**(valid | invalid))
+            SourceLifecycleEvent.model_validate(valid | invalid)
 
 
 def test_registration_replay_conflicts_and_withdrawn_state_are_stable() -> None:

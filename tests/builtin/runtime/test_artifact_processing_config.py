@@ -79,10 +79,10 @@ def test_source_count_thresholds_are_strict_optional_positive_integers() -> None
     for field in ("memory_source_count_threshold", "topic_memory_source_count_threshold"):
         assert getattr(RuntimeConfig(), field) is None
         for value in (1, 3, 100):
-            assert getattr(RuntimeConfig(**{field: value}), field) == value
+            assert getattr(RuntimeConfig.model_validate({field: value}), field) == value
         for value in (True, False, 0, -1, 1.0, "3"):
             with pytest.raises(ValidationError):
-                RuntimeConfig(**{field: value})
+                RuntimeConfig.model_validate({field: value})
 
 
 @pytest.mark.parametrize(

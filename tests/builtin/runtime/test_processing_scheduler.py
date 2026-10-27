@@ -363,7 +363,7 @@ def test_source_count_backlog_rechecks_cursor_without_draining(tmp_path):
                 bindings=(ArtifactProcessingBinding(binding, "memory", launcher, source_count_threshold=3),),
                 lease_mode="single-process",
             ) as supervisor:
-                await _wait(lambda: supervisor.family_status["memory"]["completed"] >= 3)
+                await _wait(lambda: int(supervisor.family_status["memory"]["completed"]) >= 3)
                 assert len(launcher.assignments) == 3
                 assert await _cursor_sequence(profile.database, binding, scope) == 6
                 await asyncio.sleep(0.05)
@@ -372,7 +372,7 @@ def test_source_count_backlog_rechecks_cursor_without_draining(tmp_path):
                 await _set_source_head(profile.database, scope, 9)
                 await _request(profile.database, binding, scope, requested=False)
                 supervisor.wake(binding)
-                await _wait(lambda: supervisor.family_status["memory"]["completed"] >= 4)
+                await _wait(lambda: int(supervisor.family_status["memory"]["completed"]) >= 4)
                 assert len(launcher.assignments) == 4
                 assert await _cursor_sequence(profile.database, binding, scope) == 8
                 await asyncio.sleep(0.05)
