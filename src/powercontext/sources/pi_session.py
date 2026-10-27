@@ -167,7 +167,7 @@ class _PiSessionCheckpoint(BaseModel):
             try:
                 int(digest, 16)
             except ValueError as error:
-                raise ValueError("checkpoint event digests must be hexadecimal") from error
+                raise ValueError("checkpoint event digests must be hexadecimal") from error  # noqa: TRY003
         return value
 
 
@@ -243,7 +243,7 @@ def _decode_records(content: bytes) -> list[dict[str, JsonValue]]:
     try:
         text = content.decode("utf-8-sig")
     except UnicodeDecodeError as error:
-        raise ValueError("Pi session content must be valid UTF-8") from error
+        raise ValueError("Pi session content must be valid UTF-8") from error  # noqa: TRY003
 
     records: list[dict[str, JsonValue]] = []
     for line_number, line in enumerate(text.split("\n"), start=1):
@@ -257,9 +257,9 @@ def _decode_records(content: bytes) -> list[dict[str, JsonValue]]:
                 parse_float=_finite_json_float,
             )
         except (TypeError, ValueError) as error:
-            raise ValueError(f"Pi session line {line_number} must contain valid JSON") from error
+            raise ValueError(f"Pi session line {line_number} must contain valid JSON") from error  # noqa: TRY003
         if not isinstance(record, dict):
-            raise ValueError(f"Pi session line {line_number} must contain a JSON object")  # noqa: TRY003
+            raise ValueError(f"Pi session line {line_number} must contain a JSON object")  # noqa: TRY003, TRY004
         records.append(cast(dict[str, JsonValue], record))
     return records
 
@@ -348,7 +348,7 @@ def _render_record(record: Mapping[str, object]) -> tuple[str, str] | None:
 
 def _render_message(value: object) -> tuple[str, str] | None:
     if not isinstance(value, dict):
-        raise ValueError("Pi message record must contain a message object")  # noqa: TRY003
+        raise ValueError("Pi message record must contain a message object")  # noqa: TRY003, TRY004
     role = value.get("role")
     if not isinstance(role, str) or not role:
         raise ValueError("Pi message must have a non-empty string role")  # noqa: TRY003
@@ -375,6 +375,7 @@ def _render_content(content: object, *, include_tool_calls: bool) -> str | None:
     for block in content:
         if not isinstance(block, dict):
             continue
+        block = cast(Mapping[str, object], block)
         block_type = block.get("type")
         if block_type == "text":
             text = block.get("text")
@@ -396,7 +397,7 @@ def _render_tool_call(block: Mapping[str, object]) -> str:
             block["arguments"], ensure_ascii=False, sort_keys=True, separators=(",", ":"), allow_nan=False
         )
     except (TypeError, ValueError) as error:
-        raise ValueError("Pi toolCall arguments must be finite JSON") from error
+        raise ValueError("Pi toolCall arguments must be finite JSON") from error  # noqa: TRY003
     return f"[tool_call {name} {call_id}] {arguments}"
 
 

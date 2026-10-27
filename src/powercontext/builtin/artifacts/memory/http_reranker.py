@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import math
+from typing import cast
 
 import httpx
 
@@ -67,8 +68,7 @@ class HTTPMemoryReranker:
                 json={
                     "query": query,
                     "candidates": [
-                        {"rank": rank, "text": candidate.text}
-                        for rank, candidate in enumerate(batch, start=start + 1)
+                        {"rank": rank, "text": candidate.text} for rank, candidate in enumerate(batch, start=start + 1)
                     ],
                 },
             )
@@ -94,26 +94,25 @@ def _validate_response(
 ) -> list[tuple[int, int | float]]:
     if not isinstance(payload, dict) or payload.keys() != {"scores"}:
         raise ValueError("reranker response must contain exactly the scores field")  # noqa: TRY003
+    payload = cast(dict[str, object], payload)
     scores = payload["scores"]
     if not isinstance(scores, list):
-        raise ValueError("reranker scores must be a list")  # noqa: TRY003
+        raise ValueError("reranker scores must be a list")  # noqa: TRY003, TRY004
 
     validated: list[tuple[int, int | float]] = []
     observed_ranks: set[int] = set()
     for item in scores:
-        if not isinstance(item, dict) or item.keys() != {"rank", "score"}:
+        if not isinstance(item, dict):
+            raise ValueError("reranker score entries must contain exactly rank and score")  # noqa: TRY003, TRY004
+        item = cast(dict[str, object], item)
+        if item.keys() != {"rank", "score"}:
             raise ValueError("reranker score entries must contain exactly rank and score")  # noqa: TRY003
         rank = item["rank"]
         score = item["score"]
-        if (
-            not isinstance(rank, int)
-            or isinstance(rank, bool)
-            or rank not in expected_ranks
-            or rank in observed_ranks
-        ):
+        if not isinstance(rank, int) or isinstance(rank, bool) or rank not in expected_ranks or rank in observed_ranks:
             raise ValueError("reranker scores must uniquely cover the requested batch ranks")  # noqa: TRY003
         if isinstance(score, bool) or not isinstance(score, (int, float)):
-            raise ValueError("reranker scores must be finite numbers")  # noqa: TRY003
+            raise ValueError("reranker scores must be finite numbers")  # noqa: TRY003, TRY004
         if isinstance(score, float) and not math.isfinite(score):
             raise ValueError("reranker scores must be finite numbers")  # noqa: TRY003
         observed_ranks.add(rank)
