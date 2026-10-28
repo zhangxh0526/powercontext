@@ -38,7 +38,7 @@ if TYPE_CHECKING:
 PDF_PAGE_SOURCE_NAME = "pdf-page"
 _TOKEN_PATTERN = re.compile(r"[a-z]+|\d+")
 _SHA256_PATTERN = re.compile(r"[0-9a-f]{64}")
-_MAX_SEARCH_CANDIDATES = 200
+_MAX_SEARCH_CANDIDATES = 300
 
 _STOP_WORDS = frozenset({
     "a",
@@ -131,6 +131,21 @@ _STOP_WORDS = frozenset({
     "would",
     "you",
     "your",
+    "address",
+    "based",
+    "clearly",
+    "data",
+    "decimal",
+    "definition",
+    "line",
+    "items",
+    "information",
+    "place",
+    "places",
+    "round",
+    "rounded",
+    "units",
+    "utilizing",
 })
 _TERM_SYNONYMS = {
     "amortisation": ("amortization",),
@@ -158,7 +173,7 @@ _TERM_SYNONYMS = {
     "revenues": ("sales",),
     "sales": ("revenue", "revenues"),
 }
-_PHRASE_SYNONYMS = {
+_PHRASE_SYNONYMS: dict[tuple[str, ...], tuple[tuple[str, ...], ...]] = {
     ("capex",): (
         ("capital", "expenditures"),
         ("capital", "spending"),
@@ -166,6 +181,16 @@ _PHRASE_SYNONYMS = {
     ),
     ("capital", "expenditure"): (("capital", "spending"),),
     ("capital", "expenditures"): (("capital", "spending"),),
+    ("capital", "intensive"): (
+        ("net", "sales"),
+        ("consolidated", "statement", "of", "income"),
+        ("consolidated", "balance", "sheet"),
+        ("statement", "of", "cash", "flows"),
+        ("capital", "expenditures"),
+        ("fixed", "assets"),
+        ("total", "assets"),
+    ),
+    ("capital", "intensity"): (("capital", "expenditures"), ("fixed", "assets"), ("net", "sales")),
     ("cash", "flow", "statement"): (
         ("statement", "of", "cash", "flows"),
         ("statements", "of", "cash", "flows"),
@@ -176,8 +201,36 @@ _PHRASE_SYNONYMS = {
     ),
     ("statement", "of", "cash", "flows"): (("cash", "flow", "statement"),),
     ("statements", "of", "cash", "flows"): (("cash", "flow", "statements"),),
+    ("customer", "concentration"): (
+        ("customer", "accounted"),
+        ("major", "customer"),
+        ("significant", "customer"),
+        ("customer", "revenue"),
+    ),
+    ("dpo",): (("accounts", "payable"), ("cost", "of", "sales"), ("inventories",), ("days", "payable", "outstanding")),
     ("ebit",): (("earnings", "before", "interest", "and", "taxes"),),
     ("ebitda",): (("earnings", "before", "interest", "taxes", "depreciation", "and", "amortization"),),
+    ("effective", "tax", "rate"): (
+        ("income", "tax", "expense"),
+        ("provision", "for", "income", "taxes"),
+        ("income", "before", "income", "taxes"),
+        ("statements", "of", "operations"),
+    ),
+    ("geographies",): (
+        ("africa", "middle", "east", "and", "south", "asia"),
+        ("asia", "pacific", "australia", "and", "new", "zealand", "and", "china", "region"),
+        ("reportable", "segments"),
+        ("our", "operations"),
+        ("company", "overview"),
+        ("countries", "and", "territories"),
+    ),
+    ("geography",): (("reportable", "segments"), ("our", "operations"), ("company", "overview")),
+    ("gross", "margin"): (
+        ("cost", "of", "products"),
+        ("cost", "of", "services"),
+        ("sales", "of", "products"),
+        ("sales", "of", "services"),
+    ),
     ("income", "statement"): (
         ("statement", "of", "income"),
         ("statements", "of", "income"),
@@ -192,8 +245,74 @@ _PHRASE_SYNONYMS = {
     ("legal", "battles"): (("legal", "proceedings"), ("litigation", "proceedings")),
     ("net", "income"): (("net", "earnings"),),
     ("operating", "income"): (("operating", "profit"),),
+    ("primary", "customers"): (
+        ("commercial", "airlines"),
+        ("u", "s", "government"),
+        ("government", "contracts"),
+        ("limited", "number"),
+    ),
+    ("product", "categories"): (
+        ("summary", "of", "business", "segment", "data"),
+        ("revenues", "commercial", "airplanes"),
+        ("defense", "space", "and", "security"),
+        ("global", "services"),
+        ("commercial", "airplanes"),
+        ("defense", "space", "security"),
+        ("business", "segment", "data"),
+    ),
+    ("quick", "ratio"): (
+        ("current", "assets"),
+        ("current", "liabilities"),
+        ("cash", "and", "cash", "equivalents"),
+        ("short", "term", "investments"),
+    ),
     ("restructuring", "cost"): (("restructuring", "charges"), ("restructuring", "expenses")),
     ("restructuring", "costs"): (("restructuring", "charges"), ("restructuring", "expenses")),
+    ("revenue", "change"): (
+        ("net", "sales"),
+        ("total", "net", "sales"),
+        ("net", "product", "sales"),
+        ("net", "service", "sales"),
+    ),
+    ("change", "in", "revenue"): (
+        ("net", "sales"),
+        ("total", "net", "sales"),
+        ("consolidated", "statements", "of", "operations"),
+        ("net", "product", "sales"),
+    ),
+    ("year", "over", "year"): (
+        ("net", "sales"),
+        ("total", "net", "sales"),
+        ("consolidated", "statements", "of", "operations"),
+        ("increase", "in", "net", "sales"),
+    ),
+    ("dragged", "down"): (
+        ("organic", "sales"),
+        ("total", "sales", "change"),
+        ("acquisitions", "divestitures"),
+        ("business", "segment"),
+    ),
+    ("overall", "growth"): (
+        ("organic", "sales"),
+        ("total", "sales", "change"),
+        ("acquisitions", "divestitures"),
+        ("business", "segment"),
+    ),
+    ("segment", "growth"): (
+        ("organic", "sales"),
+        ("acquisitions", "divestitures"),
+        ("total", "sales", "change"),
+        ("business", "segment"),
+    ),
+    ("service", "categories"): (
+        ("summary", "of", "business", "segment", "data"),
+        ("revenues", "commercial", "airplanes"),
+        ("defense", "space", "and", "security"),
+        ("global", "services"),
+        ("commercial", "airplanes"),
+        ("defense", "space", "security"),
+        ("business", "segment", "data"),
+    ),
 }
 
 
@@ -455,9 +574,12 @@ def _question_plan(question: str) -> _QuestionPlan:
     expanded = _unique(expanded_terms)
     phrases = _question_phrases(raw_tuple, terms, synonym_phrases)
 
-    query_candidates = [question, " ".join(terms), " ".join(expanded)]
+    query_candidates = [question, " ".join(terms[:6]), " ".join(expanded[:8])]
     for phrase in synonym_phrases[:4]:
-        query_candidates.append(" ".join(_unique([*terms, *phrase])))
+        query_candidates.append(" ".join(phrase))
+        query_candidates.append(" ".join(_unique([*terms[:3], *phrase])))
+    for phrase in phrases[len(synonym_phrases) :][:4]:
+        query_candidates.append(" ".join(phrase))
     queries = tuple(dict.fromkeys(query_candidates))
     return _QuestionPlan(terms=terms, phrases=phrases, queries=queries)
 
