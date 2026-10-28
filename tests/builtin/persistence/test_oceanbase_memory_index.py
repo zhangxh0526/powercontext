@@ -15,7 +15,6 @@
 from __future__ import annotations
 
 import asyncio
-import re
 from typing import Literal, cast
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -58,11 +57,29 @@ def _request(
     )
 
 
-def test_oceanbase_hybrid_executes_one_statement_and_restores_channels() -> None:
+def test_oceanbase_hybrid_executes_one_statement_and_preserves_channel_order() -> None:
     async def scenario() -> None:
         connection = AsyncMock(spec=AsyncConnection)
         connection.execute.return_value.mappings = MagicMock(
             return_value=[
+                {
+                    "source_channel": "vector",
+                    "memory_artifact_id": "memory-a",
+                    "head_revision": 1,
+                    "entry_id": "entry-b",
+                    "entry_version_id": "version-b",
+                    "text": "Beta current text.",
+                    "distance": 0.25,
+                },
+                {
+                    "source_channel": "fts",
+                    "memory_artifact_id": "memory-a",
+                    "head_revision": 1,
+                    "entry_id": "entry-a",
+                    "entry_version_id": "version-current",
+                    "text": "Alpha current text.",
+                    "distance": None,
+                },
                 {
                     "source_channel": "vector",
                     "memory_artifact_id": "memory-a",
@@ -76,9 +93,9 @@ def test_oceanbase_hybrid_executes_one_statement_and_restores_channels() -> None
                     "source_channel": "fts",
                     "memory_artifact_id": "memory-a",
                     "head_revision": 1,
-                    "entry_id": "entry-a",
-                    "entry_version_id": "version-current",
-                    "text": "Alpha current text.",
+                    "entry_id": "entry-b",
+                    "entry_version_id": "version-b",
+                    "text": "Beta current text.",
                     "distance": None,
                 },
             ]
@@ -102,20 +119,11 @@ def test_oceanbase_hybrid_executes_one_statement_and_restores_channels() -> None
         assert parameters["memory_artifact_ids"] == ("memory-a",)
         assert parameters["candidate_limit"] == 32
 
-        vector_selection = statement[statement.index("vector_candidates AS") : statement.index("APPROXIMATE")]
-        assert "JOIN" not in vector_selection
-        assert statement.index("FROM vector_candidates AS n") > statement.index("APPROXIMATE")
-        assert "AND h.entry_version_id = n.entry_version_id" in statement
-        assert statement.count("AND v.entry_version_id = h.entry_version_id") == 2
-        assert not re.search(r"\bhead_revision\s*(?:=|IN\b)", statement)
-        assert "m.head_revision" not in statement
-        assert (
-            "ORDER BY source_channel, fts_score DESC, distance, memory_artifact_id, entry_id, entry_version_id"
-            in statement
-        )
-
-        assert len(channels.fts) == 1
-        assert len(channels.vector) == 1
+        assert len(channels.fts) == 2
+        assert len(channels.vector) == 2
+        assert [hit.entry_id for hit in channels.fts] == ["entry-a", "entry-b"]
+        assert [hit.entry_id for hit in channels.vector] == ["entry-b", "entry-a"]
+        assert all(hit.memory_ref == _MEMORY_REF for hit in (*channels.fts, *channels.vector))
         assert channels.fts[0].memory_ref == _MEMORY_REF
         assert channels.vector[0].memory_ref == _MEMORY_REF
         assert channels.fts[0].text == "Alpha current text."

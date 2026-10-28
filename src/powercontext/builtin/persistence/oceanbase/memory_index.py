@@ -97,15 +97,42 @@ WHERE m.scope_id = :scope_id
 ORDER BY l2_distance(m.embedding, :query_vector) APPROXIMATE
 LIMIT :candidate_limit
 """
-_OCEANBASE_HYBRID_VECTOR_SQL = """vector_candidates AS (
-    SELECT m.scope_id, m.memory_artifact_id, m.entry_id, m.entry_version_id,
-           l2_distance(m.embedding, :query_vector) AS distance
-    FROM pc_memory_vector_entries AS m
-    WHERE m.scope_id = :scope_id
-      AND m.memory_artifact_id IN :memory_artifact_ids
-    ORDER BY l2_distance(m.embedding, :query_vector) APPROXIMATE
-    LIMIT :candidate_limit
-)"""
+# RRF consumes each native channel order. A global identity sort changes
+# equal-distance vector ranks relative to vector-only search.
+_OCEANBASE_UNTAGGED_HYBRID_SEARCH_SQL = """
+(
+SELECT 'fts' AS source_channel, f.memory_artifact_id, f.head_revision,
+       f.entry_id, f.entry_version_id, v.text,
+       MATCH (f.searchable_text) AGAINST (:analyzed_query) AS fts_score,
+       NULL AS distance
+FROM pc_memory_entry_heads AS f
+JOIN pc_memory_entry_versions AS v
+  ON v.scope_id = f.scope_id
+ AND v.memory_artifact_id = f.memory_artifact_id
+ AND v.entry_version_id = f.entry_version_id
+WHERE f.scope_id = :scope_id
+  AND f.memory_artifact_id IN :memory_artifact_ids
+  AND MATCH (f.searchable_text) AGAINST (:analyzed_query)
+ORDER BY fts_score DESC, f.memory_artifact_id, f.entry_id, f.entry_version_id
+LIMIT :candidate_limit
+)
+UNION ALL
+(
+SELECT 'vector' AS source_channel, m.memory_artifact_id, m.head_revision,
+       m.entry_id, m.entry_version_id, v.text,
+       NULL AS fts_score,
+       l2_distance(m.embedding, :query_vector) AS distance
+FROM pc_memory_vector_entries AS m
+JOIN pc_memory_entry_versions AS v
+  ON v.scope_id = m.scope_id
+ AND v.memory_artifact_id = m.memory_artifact_id
+ AND v.entry_version_id = m.entry_version_id
+WHERE m.scope_id = :scope_id
+  AND m.memory_artifact_id IN :memory_artifact_ids
+ORDER BY l2_distance(m.embedding, :query_vector) APPROXIMATE
+LIMIT :candidate_limit
+)
+"""
 _OCEANBASE_TAGGED_HYBRID_VECTOR_SQL = """vector_neighbors AS (
     SELECT m.scope_id, m.memory_artifact_id, m.entry_id, m.entry_version_id,
            l2_distance(m.embedding, :query_vector) AS distance
@@ -354,12 +381,7 @@ class OceanBaseMemoryVectorIndex:
             bindparam("tag_hashes", expanding=True),
             bindparam("query_vector", type_=VECTOR(profile.dimension)),
         )
-        self._hybrid_search_sql = text(
-            _OCEANBASE_HYBRID_SEARCH_SQL.format(
-                fts_tag_filter="",
-                vector_candidates=_OCEANBASE_HYBRID_VECTOR_SQL,
-            )
-        ).bindparams(
+        self._hybrid_search_sql = text(_OCEANBASE_UNTAGGED_HYBRID_SEARCH_SQL).bindparams(
             bindparam("memory_artifact_ids", expanding=True),
             bindparam("query_vector", type_=VECTOR(profile.dimension)),
         )
