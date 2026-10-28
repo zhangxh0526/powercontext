@@ -97,6 +97,32 @@ WHERE m.scope_id = :scope_id
 ORDER BY l2_distance(m.embedding, :query_vector) APPROXIMATE
 LIMIT :candidate_limit
 """
+_OCEANBASE_HYBRID_VECTOR_SQL = """vector_candidates AS (
+    SELECT m.scope_id, m.memory_artifact_id, m.entry_id, m.entry_version_id,
+           l2_distance(m.embedding, :query_vector) AS distance
+    FROM pc_memory_vector_entries AS m
+    WHERE m.scope_id = :scope_id
+      AND m.memory_artifact_id IN :memory_artifact_ids
+    ORDER BY l2_distance(m.embedding, :query_vector) APPROXIMATE
+    LIMIT :candidate_limit
+)"""
+_OCEANBASE_TAGGED_HYBRID_VECTOR_SQL = """vector_neighbors AS (
+    SELECT m.scope_id, m.memory_artifact_id, m.entry_id, m.entry_version_id,
+           l2_distance(m.embedding, :query_vector) AS distance
+    FROM pc_memory_vector_entries AS m
+    WHERE m.scope_id = :scope_id
+      AND m.memory_artifact_id IN :memory_artifact_ids
+    ORDER BY l2_distance(m.embedding, :query_vector) APPROXIMATE
+    LIMIT :ann_limit
+),
+vector_candidates AS (
+    SELECT n.scope_id, n.memory_artifact_id, n.entry_id, n.entry_version_id, n.distance
+    FROM vector_neighbors AS n
+    WHERE TRUE
+      {vector_tag_filter}
+    ORDER BY n.distance
+    LIMIT :candidate_limit
+)"""
 _OCEANBASE_HYBRID_SEARCH_SQL = """
 WITH fts_candidates AS (
     SELECT f.scope_id, f.memory_artifact_id, f.entry_id, f.entry_version_id,
@@ -109,23 +135,7 @@ WITH fts_candidates AS (
     ORDER BY fts_score DESC, f.memory_artifact_id, f.entry_id, f.entry_version_id
     LIMIT :candidate_limit
 ),
-vector_neighbors AS (
-    SELECT m.scope_id, m.memory_artifact_id, m.entry_id, m.entry_version_id,
-           l2_distance(m.embedding, :query_vector) AS distance
-    FROM pc_memory_vector_entries AS m
-    WHERE m.scope_id = :scope_id
-      AND m.memory_artifact_id IN :memory_artifact_ids
-    ORDER BY l2_distance(m.embedding, :query_vector) {approximate}
-    {ann_limit_clause}
-),
-vector_candidates AS (
-    SELECT n.scope_id, n.memory_artifact_id, n.entry_id, n.entry_version_id, n.distance
-    FROM vector_neighbors AS n
-    WHERE TRUE
-      {vector_tag_filter}
-    ORDER BY n.distance
-    {vector_final_limit}
-)
+{vector_candidates}
 SELECT 'fts' AS source_channel, h.memory_artifact_id, h.head_revision,
        h.entry_id, h.entry_version_id, v.text, f.fts_score, NULL AS distance
 FROM fts_candidates AS f
@@ -347,10 +357,7 @@ class OceanBaseMemoryVectorIndex:
         self._hybrid_search_sql = text(
             _OCEANBASE_HYBRID_SEARCH_SQL.format(
                 fts_tag_filter="",
-                vector_tag_filter="",
-                approximate="APPROXIMATE",
-                ann_limit_clause="LIMIT :candidate_limit",
-                vector_final_limit="",
+                vector_candidates=_OCEANBASE_HYBRID_VECTOR_SQL,
             )
         ).bindparams(
             bindparam("memory_artifact_ids", expanding=True),
@@ -359,10 +366,9 @@ class OceanBaseMemoryVectorIndex:
         self._tagged_hybrid_search_sql = text(
             _OCEANBASE_HYBRID_SEARCH_SQL.format(
                 fts_tag_filter=memory_tag_sql("f"),
-                vector_tag_filter=memory_tag_sql("n"),
-                approximate="APPROXIMATE",
-                ann_limit_clause="LIMIT :ann_limit",
-                vector_final_limit="LIMIT :candidate_limit",
+                vector_candidates=_OCEANBASE_TAGGED_HYBRID_VECTOR_SQL.format(
+                    vector_tag_filter=memory_tag_sql("n"),
+                ),
             )
         ).bindparams(
             bindparam("memory_artifact_ids", expanding=True),
