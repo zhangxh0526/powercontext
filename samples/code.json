@@ -1,0 +1,9 @@
+{
+  "doc_id": "code-status",
+  "kind": "code",
+  "revision": 1,
+  "title": "状态实现来源",
+  "content": "src/status.py 提供 normalize_status 的实现。samples/broken_status.py 保留修改前未实现版本，用于对照验证。",
+  "source_path": "src/status.py",
+  "keywords": ["status", "normalize_status", "code", "状态"]
+}

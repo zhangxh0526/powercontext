@@ -1,0 +1,9 @@
+{
+  "doc_id": "test-status",
+  "kind": "test",
+  "revision": 1,
+  "title": "状态测试清单",
+  "content": "tests/test_status.py 覆盖大写、空格、连字符、已完成、未知值和空字符串。tests/test_context_manager.py 验证规格更新和任务状态重启复用。",
+  "source_path": "tests/test_status.py",
+  "keywords": ["status", "normalize_status", "test", "状态", "tests"]
+}

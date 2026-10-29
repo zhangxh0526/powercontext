@@ -1,0 +1,9 @@
+{
+  "doc_id": "design-status",
+  "kind": "design",
+  "revision": 1,
+  "title": "状态映射设计",
+  "content": "使用固定字典映射，输入先 strip，再统一大小写并把空格和连字符替换为下划线。上下文存储只负责检索，不在 normalize_status 中写数据库。",
+  "source_path": "samples/design.json",
+  "keywords": ["status", "normalize_status", "mapping", "状态", "design"]
+}
