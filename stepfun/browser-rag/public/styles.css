@@ -1,0 +1,45 @@
+:root {
+  color-scheme: light;
+  font-family: system-ui, -apple-system, "PingFang SC", sans-serif;
+  color: #172a24;
+  background: #f4f7f4;
+}
+* { box-sizing: border-box; }
+body { margin: 0; }
+main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+h1 { font-size: 42px; margin: 4px 0 10px; letter-spacing: -1px; }
+h2 { font-size: 19px; margin-top: 0; }
+.eyebrow { color: #247353; font-size: 12px; letter-spacing: 2px; font-weight: 700; }
+.intro { color: #50665b; line-height: 1.7; }
+.panel { background: white; border: 1px solid #dce5dc; border-radius: 12px; padding: 22px; margin: 18px 0; }
+.status-panel { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.status-panel strong { display: block; font-size: 14px; line-height: 1.5; }
+.label { display: block; color: #718276; font-size: 12px; margin-bottom: 6px; }
+.row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+input, select, button { font: inherit; min-height: 42px; border-radius: 7px; }
+input, select { border: 1px solid #bac9bc; padding: 9px 12px; background: white; min-width: 0; }
+select { flex: 1; }
+#new-collection { flex: 1; }
+#documents { flex: 1; }
+form { display: grid; gap: 12px; }
+button { border: 1px solid #166b47; background: #166b47; color: white; padding: 9px 18px; cursor: pointer; font-weight: 600; }
+button.secondary { color: #245540; background: #f4f8f3; border-color: #b9ccba; }
+button.danger { color: #a6382d; }
+button:disabled { opacity: .45; cursor: not-allowed; }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid #8cc6a3; outline-offset: 2px; }
+progress { width: 100%; margin-top: 18px; accent-color: #247353; }
+.detail { font-size: 13px; color: #64766a; font-weight: 400; }
+#message { min-height: 28px; white-space: pre-wrap; }
+.error { color: #a6382d; }
+.success { color: #166b47; }
+.result { border-top: 1px solid #e0e8df; padding: 18px 0; }
+.result h3 { margin: 0 0 8px; font-size: 16px; }
+.result p { white-space: pre-wrap; line-height: 1.7; overflow-wrap: anywhere; }
+.result-meta { font-family: ui-monospace, monospace; font-size: 12px; color: #607466; overflow-wrap: anywhere; }
+footer { color: #6d7d72; font-size: 12px; line-height: 1.7; padding: 12px 0 30px; }
+@media (max-width: 700px) {
+  main { padding: 24px 14px; }
+  h1 { font-size: 34px; }
+  .status-panel { grid-template-columns: 1fr; }
+  .row > * { width: 100%; }
+}

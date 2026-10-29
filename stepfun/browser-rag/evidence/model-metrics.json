@@ -1,0 +1,582 @@
+{
+  "success": true,
+  "model": "Xenova/bge-small-zh-v1.5",
+  "revision": "75c43b069aac4d136ba6bc1122f995fedcfd2781",
+  "method": "Actual browser inference; manually labelled six-document smoke set, not a general model quality benchmark",
+  "compressionRatio": 3.8843229930399015,
+  "results": [
+    {
+      "device": "wasm",
+      "dtype": "fp32",
+      "model": {
+        "device": "wasm",
+        "dtype": "fp32",
+        "loadMs": 1578.5999999046326
+      },
+      "adapter": {
+        "vendor": "google",
+        "architecture": "swiftshader",
+        "device": null,
+        "description": null,
+        "isFallbackAdapter": null
+      },
+      "runtimeFiles": {
+        "commonBytes": 549873,
+        "weightFile": "model.onnx",
+        "weightBytes": 94851877,
+        "totalBytes": 95401750
+      },
+      "firstLoadAndWarmupMs": 1578.5999999046326,
+      "documentBatchTimes": [
+        267.2999999523163,
+        70
+      ],
+      "queryTimes": [
+        {
+          "round": 0,
+          "query": "怎样提升全文检索效率？",
+          "elapsedMs": 37.59999990463257
+        },
+        {
+          "round": 0,
+          "query": "如何在设备本地进行语义检索？",
+          "elapsedMs": 41.90000009536743
+        },
+        {
+          "round": 0,
+          "query": "RDMA 延迟实验怎么比较？",
+          "elapsedMs": 35.89999985694885
+        },
+        {
+          "round": 0,
+          "query": "怎样安排课程复习？",
+          "elapsedMs": 34.5
+        },
+        {
+          "round": 0,
+          "query": "土豆炖肉怎么做？",
+          "elapsedMs": 33.799999952316284
+        },
+        {
+          "round": 1,
+          "query": "怎样提升全文检索效率？",
+          "elapsedMs": 37.799999952316284
+        },
+        {
+          "round": 1,
+          "query": "如何在设备本地进行语义检索？",
+          "elapsedMs": 41.299999952316284
+        },
+        {
+          "round": 1,
+          "query": "RDMA 延迟实验怎么比较？",
+          "elapsedMs": 42.09999990463257
+        },
+        {
+          "round": 1,
+          "query": "怎样安排课程复习？",
+          "elapsedMs": 36.299999952316284
+        },
+        {
+          "round": 1,
+          "query": "土豆炖肉怎么做？",
+          "elapsedMs": 32.700000047683716
+        },
+        {
+          "round": 2,
+          "query": "怎样提升全文检索效率？",
+          "elapsedMs": 37.200000047683716
+        },
+        {
+          "round": 2,
+          "query": "如何在设备本地进行语义检索？",
+          "elapsedMs": 40.299999952316284
+        },
+        {
+          "round": 2,
+          "query": "RDMA 延迟实验怎么比较？",
+          "elapsedMs": 34.700000047683716
+        },
+        {
+          "round": 2,
+          "query": "怎样安排课程复习？",
+          "elapsedMs": 33.60000014305115
+        },
+        {
+          "round": 2,
+          "query": "土豆炖肉怎么做？",
+          "elapsedMs": 32.59999990463257
+        }
+      ],
+      "warmQueryMedianMs": 36.75,
+      "quality": [
+        {
+          "query": "怎样提升全文检索效率？",
+          "relevant": [
+            "fts",
+            "hybrid"
+          ],
+          "top2": [
+            "fts",
+            "hybrid"
+          ],
+          "recallAt2": 1,
+          "ndcgAt5": 1
+        },
+        {
+          "query": "如何在设备本地进行语义检索？",
+          "relevant": [
+            "vector",
+            "hybrid"
+          ],
+          "top2": [
+            "vector",
+            "hybrid"
+          ],
+          "recallAt2": 1,
+          "ndcgAt5": 1
+        },
+        {
+          "query": "RDMA 延迟实验怎么比较？",
+          "relevant": [
+            "rdma"
+          ],
+          "top2": [
+            "rdma",
+            "study"
+          ],
+          "recallAt2": 1,
+          "ndcgAt5": 1
+        },
+        {
+          "query": "怎样安排课程复习？",
+          "relevant": [
+            "study"
+          ],
+          "top2": [
+            "study",
+            "fts"
+          ],
+          "recallAt2": 1,
+          "ndcgAt5": 1
+        },
+        {
+          "query": "土豆炖肉怎么做？",
+          "relevant": [
+            "cooking"
+          ],
+          "top2": [
+            "cooking",
+            "study"
+          ],
+          "recallAt2": 1,
+          "ndcgAt5": 1
+        }
+      ],
+      "meanRecallAt2": 1,
+      "meanNdcgAt5": 1,
+      "requests": [
+        "http://127.0.0.1:18083/",
+        "http://127.0.0.1:18083/styles.css",
+        "http://127.0.0.1:18083/app.js",
+        "http://127.0.0.1:18083/embeddings.js",
+        "http://127.0.0.1:18083/node_modules/@huggingface/transformers/dist/transformers.min.js",
+        "http://127.0.0.1:18083/api/health",
+        "http://127.0.0.1:18083/api/samples",
+        "http://127.0.0.1:18083/models/Xenova/bge-small-zh-v1.5/config.json",
+        "http://127.0.0.1:18083/api/collections",
+        "http://127.0.0.1:18083/models/Xenova/bge-small-zh-v1.5/tokenizer_config.json",
+        "http://127.0.0.1:18083/models/Xenova/bge-small-zh-v1.5/onnx/model.onnx",
+        "http://127.0.0.1:18083/models/Xenova/bge-small-zh-v1.5/tokenizer.json",
+        "http://127.0.0.1:18083/models/Xenova/bge-small-zh-v1.5/tokenizer.json",
+        "http://127.0.0.1:18083/models/Xenova/bge-small-zh-v1.5/tokenizer_config.json",
+        "http://127.0.0.1:18083/models/Xenova/bge-small-zh-v1.5/onnx/model.onnx",
+        "http://127.0.0.1:18083/node_modules/onnxruntime-web/dist/ort-wasm-simd-threaded.asyncify.mjs",
+        "http://127.0.0.1:18083/node_modules/onnxruntime-web/dist/ort-wasm-simd-threaded.asyncify.wasm"
+      ],
+      "errors": []
+    },
+    {
+      "device": "wasm",
+      "dtype": "q8",
+      "model": {
+        "device": "wasm",
+        "dtype": "q8",
+        "loadMs": 1063.7999999523163
+      },
+      "adapter": {
+        "vendor": "google",
+        "architecture": "swiftshader",
+        "device": null,
+        "description": null,
+        "isFallbackAdapter": null
+      },
+      "runtimeFiles": {
+        "commonBytes": 549873,
+        "weightFile": "model_quantized.onnx",
+        "weightBytes": 24010842,
+        "totalBytes": 24560715
+      },
+      "firstLoadAndWarmupMs": 1063.7999999523163,
+      "documentBatchTimes": [
+        147.70000004768372,
+        41.299999952316284
+      ],
+      "queryTimes": [
+        {
+          "round": 0,
+          "query": "怎样提升全文检索效率？",
+          "elapsedMs": 22.5
+        },
+        {
+          "round": 0,
+          "query": "如何在设备本地进行语义检索？",
+          "elapsedMs": 28.799999952316284
+        },
+        {
+          "round": 0,
+          "query": "RDMA 延迟实验怎么比较？",
+          "elapsedMs": 21.90000009536743
+        },
+        {
+          "round": 0,
+          "query": "怎样安排课程复习？",
+          "elapsedMs": 21.5
+        },
+        {
+          "round": 0,
+          "query": "土豆炖肉怎么做？",
+          "elapsedMs": 20.200000047683716
+        },
+        {
+          "round": 1,
+          "query": "怎样提升全文检索效率？",
+          "elapsedMs": 22.200000047683716
+        },
+        {
+          "round": 1,
+          "query": "如何在设备本地进行语义检索？",
+          "elapsedMs": 26.699999809265137
+        },
+        {
+          "round": 1,
+          "query": "RDMA 延迟实验怎么比较？",
+          "elapsedMs": 22.90000009536743
+        },
+        {
+          "round": 1,
+          "query": "怎样安排课程复习？",
+          "elapsedMs": 22.5
+        },
+        {
+          "round": 1,
+          "query": "土豆炖肉怎么做？",
+          "elapsedMs": 20.200000047683716
+        },
+        {
+          "round": 2,
+          "query": "怎样提升全文检索效率？",
+          "elapsedMs": 22.5
+        },
+        {
+          "round": 2,
+          "query": "如何在设备本地进行语义检索？",
+          "elapsedMs": 24.59999990463257
+        },
+        {
+          "round": 2,
+          "query": "RDMA 延迟实验怎么比较？",
+          "elapsedMs": 23.5
+        },
+        {
+          "round": 2,
+          "query": "怎样安排课程复习？",
+          "elapsedMs": 21.799999952316284
+        },
+        {
+          "round": 2,
+          "query": "土豆炖肉怎么做？",
+          "elapsedMs": 20.300000190734863
+        }
+      ],
+      "warmQueryMedianMs": 22.5,
+      "quality": [
+        {
+          "query": "怎样提升全文检索效率？",
+          "relevant": [
+            "fts",
+            "hybrid"
+          ],
+          "top2": [
+            "fts",
+            "hybrid"
+          ],
+          "recallAt2": 1,
+          "ndcgAt5": 1
+        },
+        {
+          "query": "如何在设备本地进行语义检索？",
+          "relevant": [
+            "vector",
+            "hybrid"
+          ],
+          "top2": [
+            "vector",
+            "hybrid"
+          ],
+          "recallAt2": 1,
+          "ndcgAt5": 1
+        },
+        {
+          "query": "RDMA 延迟实验怎么比较？",
+          "relevant": [
+            "rdma"
+          ],
+          "top2": [
+            "rdma",
+            "study"
+          ],
+          "recallAt2": 1,
+          "ndcgAt5": 1
+        },
+        {
+          "query": "怎样安排课程复习？",
+          "relevant": [
+            "study"
+          ],
+          "top2": [
+            "study",
+            "fts"
+          ],
+          "recallAt2": 1,
+          "ndcgAt5": 1
+        },
+        {
+          "query": "土豆炖肉怎么做？",
+          "relevant": [
+            "cooking"
+          ],
+          "top2": [
+            "cooking",
+            "study"
+          ],
+          "recallAt2": 1,
+          "ndcgAt5": 1
+        }
+      ],
+      "meanRecallAt2": 1,
+      "meanNdcgAt5": 1,
+      "requests": [
+        "http://127.0.0.1:18083/",
+        "http://127.0.0.1:18083/styles.css",
+        "http://127.0.0.1:18083/app.js",
+        "http://127.0.0.1:18083/embeddings.js",
+        "http://127.0.0.1:18083/node_modules/@huggingface/transformers/dist/transformers.min.js",
+        "http://127.0.0.1:18083/api/health",
+        "http://127.0.0.1:18083/api/samples",
+        "http://127.0.0.1:18083/models/Xenova/bge-small-zh-v1.5/config.json",
+        "http://127.0.0.1:18083/api/collections",
+        "http://127.0.0.1:18083/models/Xenova/bge-small-zh-v1.5/tokenizer_config.json",
+        "http://127.0.0.1:18083/models/Xenova/bge-small-zh-v1.5/onnx/model_quantized.onnx",
+        "http://127.0.0.1:18083/models/Xenova/bge-small-zh-v1.5/tokenizer.json",
+        "http://127.0.0.1:18083/models/Xenova/bge-small-zh-v1.5/tokenizer.json",
+        "http://127.0.0.1:18083/models/Xenova/bge-small-zh-v1.5/tokenizer_config.json",
+        "http://127.0.0.1:18083/models/Xenova/bge-small-zh-v1.5/onnx/model_quantized.onnx",
+        "http://127.0.0.1:18083/node_modules/onnxruntime-web/dist/ort-wasm-simd-threaded.asyncify.mjs",
+        "http://127.0.0.1:18083/node_modules/onnxruntime-web/dist/ort-wasm-simd-threaded.asyncify.wasm"
+      ],
+      "errors": []
+    },
+    {
+      "device": "webgpu",
+      "dtype": "fp32",
+      "model": {
+        "device": "webgpu",
+        "dtype": "fp32",
+        "loadMs": 3390.5
+      },
+      "adapter": {
+        "vendor": "google",
+        "architecture": "swiftshader",
+        "device": null,
+        "description": null,
+        "isFallbackAdapter": null
+      },
+      "runtimeFiles": {
+        "commonBytes": 549873,
+        "weightFile": "model.onnx",
+        "weightBytes": 94851877,
+        "totalBytes": 95401750
+      },
+      "firstLoadAndWarmupMs": 3390.5,
+      "documentBatchTimes": [
+        6254.5,
+        1430.6000001430511
+      ],
+      "queryTimes": [
+        {
+          "round": 0,
+          "query": "怎样提升全文检索效率？",
+          "elapsedMs": 2075.5
+        },
+        {
+          "round": 0,
+          "query": "如何在设备本地进行语义检索？",
+          "elapsedMs": 1325
+        },
+        {
+          "round": 0,
+          "query": "RDMA 延迟实验怎么比较？",
+          "elapsedMs": 750.6000001430511
+        },
+        {
+          "round": 0,
+          "query": "怎样安排课程复习？",
+          "elapsedMs": 755.7999999523163
+        },
+        {
+          "round": 0,
+          "query": "土豆炖肉怎么做？",
+          "elapsedMs": 723.3999998569489
+        },
+        {
+          "round": 1,
+          "query": "怎样提升全文检索效率？",
+          "elapsedMs": 719.4000000953674
+        },
+        {
+          "round": 1,
+          "query": "如何在设备本地进行语义检索？",
+          "elapsedMs": 1407.5
+        },
+        {
+          "round": 1,
+          "query": "RDMA 延迟实验怎么比较？",
+          "elapsedMs": 772.2000000476837
+        },
+        {
+          "round": 1,
+          "query": "怎样安排课程复习？",
+          "elapsedMs": 722.2000000476837
+        },
+        {
+          "round": 1,
+          "query": "土豆炖肉怎么做？",
+          "elapsedMs": 734.2999999523163
+        },
+        {
+          "round": 2,
+          "query": "怎样提升全文检索效率？",
+          "elapsedMs": 753.2000000476837
+        },
+        {
+          "round": 2,
+          "query": "如何在设备本地进行语义检索？",
+          "elapsedMs": 1467.8000001907349
+        },
+        {
+          "round": 2,
+          "query": "RDMA 延迟实验怎么比较？",
+          "elapsedMs": 730.1999998092651
+        },
+        {
+          "round": 2,
+          "query": "怎样安排课程复习？",
+          "elapsedMs": 749.2999999523163
+        },
+        {
+          "round": 2,
+          "query": "土豆炖肉怎么做？",
+          "elapsedMs": 818.0999999046326
+        }
+      ],
+      "warmQueryMedianMs": 751.25,
+      "quality": [
+        {
+          "query": "怎样提升全文检索效率？",
+          "relevant": [
+            "fts",
+            "hybrid"
+          ],
+          "top2": [
+            "fts",
+            "hybrid"
+          ],
+          "recallAt2": 1,
+          "ndcgAt5": 1
+        },
+        {
+          "query": "如何在设备本地进行语义检索？",
+          "relevant": [
+            "vector",
+            "hybrid"
+          ],
+          "top2": [
+            "vector",
+            "hybrid"
+          ],
+          "recallAt2": 1,
+          "ndcgAt5": 1
+        },
+        {
+          "query": "RDMA 延迟实验怎么比较？",
+          "relevant": [
+            "rdma"
+          ],
+          "top2": [
+            "rdma",
+            "study"
+          ],
+          "recallAt2": 1,
+          "ndcgAt5": 1
+        },
+        {
+          "query": "怎样安排课程复习？",
+          "relevant": [
+            "study"
+          ],
+          "top2": [
+            "study",
+            "fts"
+          ],
+          "recallAt2": 1,
+          "ndcgAt5": 1
+        },
+        {
+          "query": "土豆炖肉怎么做？",
+          "relevant": [
+            "cooking"
+          ],
+          "top2": [
+            "cooking",
+            "study"
+          ],
+          "recallAt2": 1,
+          "ndcgAt5": 1
+        }
+      ],
+      "meanRecallAt2": 1,
+      "meanNdcgAt5": 1,
+      "requests": [
+        "http://127.0.0.1:18083/",
+        "http://127.0.0.1:18083/styles.css",
+        "http://127.0.0.1:18083/app.js",
+        "http://127.0.0.1:18083/embeddings.js",
+        "http://127.0.0.1:18083/node_modules/@huggingface/transformers/dist/transformers.min.js",
+        "http://127.0.0.1:18083/api/health",
+        "http://127.0.0.1:18083/api/samples",
+        "http://127.0.0.1:18083/models/Xenova/bge-small-zh-v1.5/config.json",
+        "http://127.0.0.1:18083/api/collections",
+        "http://127.0.0.1:18083/models/Xenova/bge-small-zh-v1.5/tokenizer_config.json",
+        "http://127.0.0.1:18083/models/Xenova/bge-small-zh-v1.5/onnx/model.onnx",
+        "http://127.0.0.1:18083/models/Xenova/bge-small-zh-v1.5/tokenizer.json",
+        "http://127.0.0.1:18083/models/Xenova/bge-small-zh-v1.5/tokenizer.json",
+        "http://127.0.0.1:18083/models/Xenova/bge-small-zh-v1.5/tokenizer_config.json",
+        "http://127.0.0.1:18083/models/Xenova/bge-small-zh-v1.5/onnx/model.onnx",
+        "http://127.0.0.1:18083/node_modules/onnxruntime-web/dist/ort-wasm-simd-threaded.asyncify.mjs",
+        "http://127.0.0.1:18083/node_modules/onnxruntime-web/dist/ort-wasm-simd-threaded.asyncify.wasm"
+      ],
+      "errors": []
+    }
+  ]
+}

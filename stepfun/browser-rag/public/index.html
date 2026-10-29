@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
+  <title>拾光知识库 · 浏览器本地向量检索</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main>
+    <header>
+      <p class="eyebrow">LOCAL FIRST KNOWLEDGE BASE</p>
+      <h1>拾光知识库</h1>
+      <p class="intro">文档留在你的设备，向量在浏览器生成，混合检索由 seekdb 执行。</p>
+    </header>
+
+    <section class="panel status-panel" aria-label="运行状态">
+      <div><span class="label">推理后端</span><strong id="backend" data-testid="backend">尚未加载模型</strong></div>
+      <div><span class="label">数据库</span><strong id="database-status">连接中</strong></div>
+      <div><span class="label">模型</span><strong>Xenova/bge-small-zh-v1.5 · 512 维</strong></div>
+    </section>
+
+    <section class="panel">
+      <h2>1. 选择知识库</h2>
+      <div class="row">
+        <select id="collection" aria-label="当前知识库"></select>
+        <input id="new-collection" maxlength="40" placeholder="新知识库名称" aria-label="新知识库名称">
+        <button id="create-collection" class="secondary">新建</button>
+        <button id="delete-collection" class="danger secondary">删除当前</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>2. 导入文档</h2>
+      <p>支持 `.txt` 和 `.md`，单文件不超过 1 MiB。长文按段落分块，原文与向量写入 seekdb。</p>
+      <div class="row">
+        <input id="documents" type="file" accept=".txt,.md,text/plain,text/markdown" multiple>
+        <button id="load-samples" class="secondary">加载演示语料</button>
+        <button id="import" disabled>本地向量化并导入</button>
+      </div>
+      <progress id="import-progress" value="0" max="1" aria-label="导入进度"></progress>
+      <p id="model-progress" class="detail"></p>
+    </section>
+
+    <section class="panel">
+      <h2>3. 混合检索</h2>
+      <form id="search-form">
+        <label for="query">想了解什么？</label>
+        <input id="query" required maxlength="1000" value="怎样提升全文检索效率？">
+        <label for="keyword">全文关键词 <span class="detail">由 seekdb 与向量检索联合执行</span></label>
+        <input id="keyword" required maxlength="200" value="全文索引">
+        <button id="search" type="submit">检索</button>
+      </form>
+      <p id="search-metrics" class="detail" aria-live="polite"></p>
+      <div id="results" aria-live="polite"></div>
+    </section>
+
+    <p id="message" role="status" aria-live="polite"></p>
+    <footer>不调用云端推理 API。模型文件可联网下载，计算始终在当前浏览器中完成。</footer>
+  </main>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

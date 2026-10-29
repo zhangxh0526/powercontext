@@ -1,0 +1,12 @@
+{
+  "success": true,
+  "checks": [
+    "database hybrid search returns full-text and vector candidates in rank order",
+    "same source file updates rather than duplicating content",
+    "shorter replacement removes stale trailing chunks",
+    "collections isolate stored documents and search results",
+    "invalid vector dimensions are rejected before writing",
+    "a new database client recovers the updated document after restart",
+    "verification collections are removed after successful checks"
+  ]
+}
