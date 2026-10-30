@@ -1,0 +1,164 @@
+- link "跳转到主要内容":
+  - /url: "#main-content"
+- navigation "工作室":
+  - list:
+    - link "主页":
+      - /url: /
+    - listitem: /
+    - link "工作室":
+      - /url: /apps
+- button "搜索任何内容"
+- button "收起侧边栏"
+- generic: 🧙
+- generic "记忆 NPC"
+- button "记忆 NPC 的更多操作"
+- generic: Chatflow
+- navigation "记忆 NPC":
+  - link "编排":
+    - /url: /app/5085afd2-a327-40d4-b60f-8ead163ad75a/workflow
+    - generic: 编排
+  - link "访问入口":
+    - /url: /app/5085afd2-a327-40d4-b60f-8ead163ad75a/access-point
+    - generic: 访问入口
+  - separator
+  - link "日志":
+    - /url: /app/5085afd2-a327-40d4-b60f-8ead163ad75a/logs
+    - generic: 日志
+  - link "标注":
+    - /url: /app/5085afd2-a327-40d4-b60f-8ead163ad75a/annotations
+    - generic: 标注
+  - separator
+  - link "监测":
+    - /url: /app/5085afd2-a327-40d4-b60f-8ead163ad75a/overview
+    - generic: 监测
+- button "Xianghe Zhang 账户":
+  - generic: X
+  - generic "Xianghe Zhang"
+  - generic: 账户
+- button "打开帮助菜单"
+- main:
+  - button "添加节点"
+  - button "添加注释"
+  - separator
+  - button "指针模式" [pressed]
+  - button "手模式"
+  - separator
+  - button "整理节点"
+  - button "导出图片"
+  - button "撤销" [disabled]
+  - button "重做" [disabled]
+  - separator
+  - button "变更历史"
+  - button "查看缓存"
+  - button "清除"
+  - img "React Flow mini map"
+  - button "缩小"
+  - button "76%"
+  - button "放大"
+  - status "工作流保存状态":
+    - generic: 自动保存
+    - time: 10:30:59
+    - generic: ·
+    - generic: 未发布
+  - button "预览": 预览
+  - button "查看运行历史"
+  - button "检查清单":
+    - generic: 检查清单
+  - button "会话变量"
+  - button "环境变量"
+  - button "系统变量"
+  - button "功能": 功能
+  - button "发布": 发布
+  - button "版本历史"
+  - separator "预览"
+  - generic: 预览
+  - button "重新开始"
+  - button "关闭"
+  - paragraph: 我选择前往森林并带上地图。
+  - button "工作流运行成功 Answer":
+    - img "工作流运行成功"
+    - generic: Answer
+  - paragraph: 你决定前往森林，并带上地图。聪明的选择！在这个神秘的森林中，树木高耸入云，鸟儿在枝头欢唱，偶尔还能听到松鼠的窃窃私语。
+  - paragraph: 你走在蜿蜒的路径上，地图显示前方有一个隐藏的湖泊，也许那里会有一些奇遇等待着你！你想先去湖泊看看，还是继续在森林里探索其他地方？
+  - paragraph: 我之前去了哪里，带了什么？
+  - button "日志":
+  - button "复制"
+  - button "重新生成"
+  - button "工作流运行成功 工作流" [expanded]:
+    - img "工作流运行成功"
+    - generic: 工作流
+  - button "开始 0.109 ms 成功":
+    - generic: 开始
+    - generic: 0.109 ms
+    - generic: 成功
+  - button "写入选择到 PowerContext 336.657 ms 成功":
+    - generic: 写入选择到 PowerContext
+    - generic: 336.657 ms
+    - generic: 成功
+  - button "从 PowerContext 召回记忆 335.090 ms 成功":
+    - generic: 从 PowerContext 召回记忆
+    - generic: 335.090 ms
+    - generic: 成功
+  - button "NPC 根据记忆回复 429 tokens · 1.084 s 成功":
+    - generic: NPC 根据记忆回复
+    - generic: 429 tokens · 1.084 s
+    - generic: 成功
+  - button "Answer 0.082 ms 成功":
+    - generic: Answer
+    - generic: 0.082 ms
+    - generic: 成功
+  - paragraph: 你之前选择前往森林，并带上了地图！准备好继续探索了吗？还有什么地方想去，或者想带上什么新玩意儿？🌳🗺️
+  - textbox "和 Bot 聊天"
+  - button "发送" [disabled]
+  - button "开启功能增强 web app 用户体验":
+    - generic: 开启功能增强 web app 用户体验
+  - region "工作流":
+    - button "添加节点"
+    - button "添加节点"
+    - button "添加节点"
+    - button "添加节点"
+    - button "开始 运行此步骤 更多 添加节点 开始":
+      - generic: 开始
+      - button "运行此步骤"
+      - button "更多"
+      - button "添加节点"
+      - generic "开始"
+    - button "运行此步骤 更多 添加节点 写入选择到 PowerContext post POWERCONTEXT_URL /v1/memory/remember 保存玩家当前选择":
+      - button "运行此步骤"
+      - button "更多"
+      - button "添加节点"
+      - generic "写入选择到 PowerContext"
+      - generic: post
+      - generic "POWERCONTEXT_URL"
+      - text: /v1/memory/remember
+      - generic: 保存玩家当前选择
+    - button "运行此步骤 更多 添加节点 从 PowerContext 召回记忆 post POWERCONTEXT_URL /v1/context/prepare 召回与当前问题相关的历史选择":
+      - button "运行此步骤"
+      - button "更多"
+      - button "添加节点"
+      - generic "从 PowerContext 召回记忆"
+      - generic: post
+      - generic "POWERCONTEXT_URL"
+      - text: /v1/context/prepare
+      - generic: 召回与当前问题相关的历史选择
+    - button "运行此步骤 更多 添加节点 NPC 根据记忆回复 gpt-4o-mini CHAT":
+      - button "运行此步骤"
+      - button "更多"
+      - button "添加节点"
+      - generic "NPC 根据记忆回复"
+      - button "gpt-4o-mini CHAT" [disabled]:
+        - generic "gpt-4o-mini"
+        - generic: CHAT
+    - button "更多 添加节点 Answer 回复 NPC 根据记忆回复 / text":
+      - button "更多"
+      - button "添加节点"
+      - generic "Answer"
+      - generic: 回复
+      - generic "NPC 根据记忆回复"
+      - generic: /
+      - generic "text"
+    - link "React Flow attribution":
+      - /url: https://reactflow.dev
+      - text: React Flow
+- alert
+- region "Notifications"

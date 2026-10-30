@@ -1,0 +1,21 @@
+{
+  "date": "2026-10-30",
+  "environment": "Dify Cloud workflow preview",
+  "app_url": "https://cloud.dify.ai/app/5085afd2-a327-40d4-b60f-8ead163ad75a/workflow",
+  "scope_id": "scp_5zm4pd50hcvk7pdv3cbmtfp2k8",
+  "initial_scope_status": "empty",
+  "model": "gpt-4o-mini",
+  "llm_memory": null,
+  "first_turn": {
+    "input": "我选择前往森林并带上地图。",
+    "write_status": 200,
+    "entry_id": "mem_ent_c66bcde435494d7aa7d2527fdceb1c32"
+  },
+  "second_turn": {
+    "input": "我之前去了哪里，带了什么？",
+    "answer": "你之前选择前往森林，并带上了地图！准备好继续探索了吗？还有什么地方想去，或者想带上什么新玩意儿？🌳🗺️",
+    "recall_status": 200,
+    "cites_first_turn_entry": true
+  },
+  "published": false
+}
