@@ -578,3 +578,111 @@ All three TEXT_REVIEW items are fixed and re-verified over real HTTP; the remain
 **交付物**：`site/`（index＋run＋styles＋验收截图，链接已用本机静态服务器逐条检查为 200，无本地服务地址/token）、`RUN_AND_VERIFY.md`（安装→启动→停止→验证＋初始数据/步骤/预期/实际）、`EVIDENCE_INDEX.md`、`DEVELOPMENT_LOG.md`（含踩坑与失败修复顺序，明确标注不作为验收结论）、`config.example.env`、`.gitignore`（忽略 `.env data/ runtime/`，保留 `evidence/`）。
 
 未发布站点、未推送 Git。本机开发服务仍在 `http://127.0.0.1:8710` 运行（`./scripts/dev-server.sh stop` 可停），供你复核修复后的保存结果行——浏览器页面验收仍由你执行，我未运行任何浏览器自动化。
+
+
+## publish-20261030.jsonl
+
+### 可见助手消息（事件 5）
+
+用户已授权公开发布，先加载 Qoder Sites 发布流程。
+
+- 操作（事件 6）：`Skill`
+- 文件操作回执（事件 7）：`success=True`。
+- 操作（事件 9）：`Bash` List Sites operations
+- 执行回执（事件 10）：退出码 `0`。
+- 操作（事件 12）：`Bash` Read Sites conversation context
+- 执行回执（事件 13）：退出码 `0`。
+- 操作（事件 15）：`Read` /home/legend/.qoder/sites/resources/skills/sites-hosting/references/deployment.md
+- 操作（事件 18）：`Bash` List existing sites to avoid duplicates
+- 执行回执（事件 19）：退出码 `2`。
+- 操作（事件 21）：`Bash` Describe list_sites input schema
+- 执行回执（事件 22）：退出码 `0`。
+- 操作（事件 24）：`Bash` List owned sites
+- 执行回执（事件 25）：退出码 `0`。
+- 操作（事件 27）：`Bash` Check descriptors and public output files
+- 执行回执（事件 28）：退出码 `0`。
+- 操作（事件 30）：`Bash` Describe prepare_site inputs
+- 执行回执（事件 31）：退出码 `0`。
+### 可见助手消息（事件 33）
+
+No existing Sites for this account (`total_size: 0`), so this will be a single new project. Preparing the frozen draft from the validated `site/` output.
+
+- 操作（事件 34）：`Bash` Generate action UUID
+- 执行回执（事件 35）：退出码 `0`。
+- 操作（事件 37）：`Bash` Inspect prepare_site input schema
+- 执行回执（事件 38）：退出码 `0`。
+- 操作（事件 40）：`Write` /home/legend/seekdb-competition/qoder/.sites-prepare-input.json
+- 文件操作回执（事件 41）：`success=True`。
+- 操作（事件 43）：`Bash` Prepare frozen static draft from site directory
+- 执行回执（事件 44）：退出码 `0`。
+### 可见助手消息（事件 46）
+
+Draft accepted (project created, no duplicate). Checking readiness for this exact action.
+
+- 操作（事件 47）：`Bash` Read publish status for the action
+- 执行回执（事件 48）：退出码 `0`。
+- 操作（事件 50）：`Bash` Publish the ready draft
+- 执行回执（事件 51）：退出码 `0`。
+- 操作（事件 53）：`Bash` Verify publication state
+- 执行回执（事件 54）：退出码 `0`。
+### 可见助手消息（事件 56）
+
+Publication verified. Now setting the access policy to anyone-can-access, as authorized.
+
+- 操作（事件 57）：`Bash` Read current site access policy
+- 执行回执（事件 58）：退出码 `0`。
+- 操作（事件 60）：`Bash` Describe update_access_policy inputs
+- 执行回执（事件 61）：退出码 `0`。
+- 操作（事件 63）：`Bash` Generate request UUID for access policy write
+- 执行回执（事件 64）：退出码 `0`。
+- 操作（事件 66）：`Write` /home/legend/seekdb-competition/qoder/.sites-access-input.json
+- 文件操作回执（事件 67）：`success=True`。
+- 操作（事件 69）：`Bash` Set site access policy to public
+- 执行回执（事件 70）：退出码 `0`。
+- 操作（事件 72）：`Bash` Read site and project status
+- 执行回执（事件 73）：退出码 `0`。
+- 操作（事件 75）：`Bash` Check public site over real HTTPS
+- 执行回执（事件 76）：退出码 `0`。
+- 操作（事件 81）：`Read` /home/legend/seekdb-competition/qoder/README.md
+- 操作（事件 84）：`Bash` Check for site descriptor and scratch files
+- 执行回执（事件 85）：退出码 `0`。
+- 操作（事件 87）：`Bash` Describe get_publish_status inputs
+- 执行回执（事件 88）：退出码 `0`。
+- 操作（事件 90）：`Bash` Read publish status for the published action
+- 执行回执（事件 91）：退出码 `0`。
+- 操作（事件 93）：`Read` /home/legend/seekdb-competition/qoder/.sites-prepare-input.json
+- 操作（事件 96）：`Bash` Retry same preparation to restore local descriptor
+- 执行回执（事件 97）：退出码 `0`。
+- 操作（事件 99）：`Bash` Verify descriptor and inspect site files
+- 执行回执（事件 100）：退出码 `0`。
+- 操作（事件 102）：`Bash` Re-check public reachability and save bodies
+- 执行回执（事件 103）：退出码 `0`。
+- 操作（事件 105）：`Bash` Compare served HTML with local source
+- 执行回执（事件 106）：退出码 `0`。
+- 操作（事件 108）：`Grep`
+- 操作（事件 111）：`Write` /home/legend/seekdb-competition/qoder/SITE_PUBLICATION.md
+- 文件操作回执（事件 113）：`success=True`。
+- 操作（事件 115）：`Edit` /home/legend/seekdb-competition/qoder/README.md
+- 文件操作回执（事件 117）：`success=True`。
+- 操作（事件 119）：`Edit` /home/legend/seekdb-competition/qoder/README.md
+- 文件操作回执（事件 121）：`success=True`。
+- 操作（事件 123）：`Bash` Remove scratch Sites input files
+- 执行回执（事件 124）：退出码 `0`。
+- 操作（事件 126）：`Bash` Confirm PowerContext still running and dev server status
+- 执行回执（事件 127）：退出码 `0`。
+- 操作（事件 129）：`Read` /home/legend/seekdb-competition/qoder/EVIDENCE_INDEX.md
+- 操作（事件 132）：`Read` /home/legend/seekdb-competition/qoder/EVIDENCE_INDEX.md
+- 操作（事件 135）：`Edit` /home/legend/seekdb-competition/qoder/EVIDENCE_INDEX.md
+- 文件操作回执（事件 137）：`success=True`。
+### 可见助手消息（事件 139）
+
+发布已完成并设为任何人可访问，结论全部来自 Qoder Sites 的真实读回（未使用浏览器）。
+
+- 公开网址：https://experiment-recall-6htqqhz0les.qoder.website
+- Project ID `01a18bbb-983e-7078-9551-5d4ae2ba7b36` / Site ID `01a18bbb-9840-76f5-a34b-52c8aa319ca2`（`list_sites` 当时为 0 条，未创建重复项目）
+- 部署状态：`published: true`，发布 Operation `01a18bbc-1b67-7791-8f7b-3298ce7ce480` 已 `succeeded` 且 `committed`，`lifecycle: active`，`governance_status: normal`
+- 访问策略：`public`，`auth_integration_status: not_required`
+- 上传内容仅 `site/index.html`、`site/run.html`、`site/styles.css`、`site/assets/application.jpg`；HTTPS 核对 `/` 200、`/run.html` 200、`/styles.css` 200、`/assets/application.jpg` 200，CSS 与图片字节数与本地一致，HTML 仅多出平台注入的水印脚本；正文中无本地服务地址（检索 `18081` 无匹配）、无 token 值
+- 收尾：把先前 `pending` 的本地描述文件以同一 action 恢复为 `written`（`.科研实验续作助手.qoder.site`，未重新打包/上传/发布），删除了两个 Sites 输入临时文件，PowerContext 18081 仍为 `ready`，`backend/`、`web/`、`verification/` 未改动
+
+过程记录写入 `SITE_PUBLICATION.md`，`README.md` 的发布入口与 `EVIDENCE_INDEX.md` 已按事实更新——这三处是本地未提交改动，我没有执行 git 推送；无痕窗口验收由你方浏览器完成。

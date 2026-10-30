@@ -1,0 +1,290 @@
+Window: "运行与验证说明 · 科研实验续作助手", App: Google Chrome.
+0 标准窗口 运行与验证说明 · 科研实验续作助手 - Google Chrome（无痕）, URL: experiment-recall-6htqqhz0les.qoder.website/run.html, Secondary Actions: Raise
+	1 container 运行与验证说明 · 科研实验续作助手 - Google Chrome（无痕）, URL: experiment-recall-6htqqhz0les.qoder.website/run.html
+		2 container
+			3 工具栏
+				4 按钮 返回
+				5 按钮 (disabled) 前进
+				6 按钮 重新加载
+				7 按钮 首页
+				8 container
+					9 弹出式按钮 查看网站信息
+					10 文本栏 (settable) 地址和搜索栏, Value: experiment-recall-6htqqhz0les.qoder.website/run.html, Placeholder: 问问 Google 或输入网址
+					11 按钮 为此标签页添加书签
+				12 按钮 无痕模式（已打开 2 个窗口）
+				13 弹出式按钮 Chrome
+			14 工具栏 书签
+				15 书签按钮 百度
+				16 书签按钮 禾维 AI | 检测 Claude Gemini GPT API 中转站真假
+				17 书签文件夹按钮 所有书签
+				18 分离器 分隔符
+			19 container
+				20 滚动区
+					21 HTML 内容 运行与验证说明 · 科研实验续作助手, URL: experiment-recall-6htqqhz0les.qoder.website/run.html
+						22 container
+							23 link 科研实验续作助手, Value: experiment-recall-6htqqhz0les.qoder.website/index.html
+							24 文本  · 运行与验证
+							25 标题 运行与验证说明, Value: 1
+								26 文本 运行与验证说明
+							27 文本 按本页说明在自己的环境运行应用并验证真实写入与召回。展示站不承载应用后端；服务地址和凭据由运行者配置。
+							28 container 页面导航
+								29 link 环境要求, Value: experiment-recall-6htqqhz0les.qoder.website/run.html#requirement
+								30 link 配置, Value: experiment-recall-6htqqhz0les.qoder.website/run.html#config
+								31 link 启动与停止, Value: experiment-recall-6htqqhz0les.qoder.website/run.html#start
+								32 link 真实 HTTP 验证, Value: experiment-recall-6htqqhz0les.qoder.website/run.html#verify
+								33 link 验证样例, Value: experiment-recall-6htqqhz0les.qoder.website/run.html#sample
+						34 container
+							35 标题 环境要求, Value: 2
+								36 文本 环境要求
+							37 内容列表
+								38 container
+									39 AXListMarker •
+									40 文本 Python 3.11 或更高版本（应用只用标准库，没有 pip 依赖）。
+								41 container
+									42 AXListMarker •
+									43 text 一个可访问的 PowerContext 服务，OpenAPI 版本 v1.2.0，能力包含  /v1/memory/remember 、 /v1/context/prepare 、 /v1/memory/entries/list 。
+								44 container
+									45 AXListMarker •
+									46 文本 bash 与 curl（可选，用于演示脚本）。
+							47 文本 git clone --branch qoder-solution https://github.com/zhangxh0526/powercontext.git
+cd powercontext/qoder
+python3 --version    # 需要 >= 3.11
+							48 标题 配置, Value: 2
+								49 文本 配置
+							50 文本 复制配置示例并按自己的环境填写。示例文件不含任何真实凭据。
+							51 文本 cp config.example.env .env   # .env 已在 .gitignore 中
+							52 表格 配置项
+								53 文本 配置项
+								54 row
+									55 列标题
+										56 文本 变量
+									57 列标题
+										58 文本 必填
+									59 列标题
+										60 文本 说明
+								61 row
+									62 单元格
+										63 文本 POWERCONTEXT_URL
+									64 单元格
+										65 文本 是
+									66 单元格
+										67 文本 PowerContext 服务地址，必须是 http 或 https URL。未设置时使用
+										68 文本 http://127.0.0.1:8000
+										69 文本 。
+								70 row
+									71 单元格
+										72 文本 POWERCONTEXT_TOKEN
+									73 单元格
+										74 文本 否
+									75 单元格
+										76 文本 服务启用鉴权时设置。只作为请求头发送，绝不写入日志、证据或页面。
+								77 row
+									78 单元格
+										79 文本 POWERCONTEXT_SCOPE
+									80 单元格
+										81 文本 否
+									82 单元格
+										83 文本 仅可作为"默认实验"的 Scope 复用来源。留空时每个实验都会创建并持久保存自己的 Scope；不会让所有实验共用一个 Scope。
+								84 row
+									85 单元格
+										86 文本 ASSISTANT_HOST
+										87 文本  /
+										88 文本 ASSISTANT_PORT
+									89 单元格
+										90 文本 否
+									91 单元格
+										92 文本 应用监听地址与端口，默认
+										93 文本 127.0.0.1:8710
+										94 文本 。
+								95 row
+									96 单元格
+										97 文本 ASSISTANT_DATA_DIR
+									98 单元格
+										99 文本 否
+									100 单元格
+										101 文本 实验与 Scope 映射目录，默认项目下的
+										102 文本 data/
+										103 文本 ，还包含保存时的表单元数据。召回始终读取 PowerContext。
+							104 标题 启动与停止, Value: 2
+								105 文本 启动与停止
+							106 标题 前台启动, Value: 3
+								107 文本 前台启动
+							108 文本 cd powercontext/qoder
+export POWERCONTEXT_URL='http://127.0.0.1:8000'  # 改为已有服务的地址
+python3 -m backend.server
+# 浏览器打开 http://127.0.0.1:8710/，Ctrl-C 停止
+							109 标题 后台服务脚本, Value: 3
+								110 文本 后台服务脚本
+							111 container
+								112 text 未导出  POWERCONTEXT_URL  时读取本地  .env ；已导出时使用完整的进程环境配置。
+							113 文本 ./scripts/dev-server.sh start     # 启动并等待 /api/health 就绪
+./scripts/dev-server.sh status    # 查看进程与健康状态
+./scripts/dev-server.sh logs 50   # 查看最近 50 行日志
+./scripts/dev-server.sh restart   # 重启（用于验证重启恢复）
+./scripts/dev-server.sh stop      # 停止
+							114 container
+								115 text pid 记录在  runtime/dev-server.pid ，日志在  runtime/dev-server.log ，两者都被忽略提交。
+							116 标题 真实 HTTP 验证, Value: 2
+								117 文本 真实 HTTP 验证
+							118 container
+								119 text 三个脚本都自行启动应用、发送真实 HTTP 请求、断言结果，并在失败时以非零状态退出；请求与响应写入  evidence/ 。只用命令行，不涉及浏览器自动化。
+							120 文本 export POWERCONTEXT_URL='http://127.0.0.1:8000'  # 改为已有服务的地址
+
+python3 verify_powercontext.py                  # 独立验证服务本身的写入与召回
+python3 verification/verify_app.py              # 应用主流程：空状态、写入、召回、隔离、重启恢复、错误状态
+python3 verification/verify_save_order.py       # 连续保存回归：最新一次成功保存必须被召回
+python3 verification/verify_text_roundtrip.py   # 文本往返回归：分号/字段名/引号/HTML/换行逐字一致
+
+./scripts/dev-server.sh start
+python3 scripts/demo-run.py                     # 端到端演示：创建→保存→召回→重启进程→再召回
+							121 container
+								122 text 页面交互与截图由项目验收方在自己的浏览器中完成，结果保存在  evidence/browser-ui-20261030/ 。
+							123 标题 验证样例, Value: 2
+								124 文本 验证样例
+							125 文本 下面这组数据、步骤、预期与实际结果来自真实的命令行端到端演示，实际结果逐字摘自对应证据文件。
+							126 标题 初始数据, Value: 3
+								127 文本 初始数据
+							128 表格
+								129 row
+									130 行标题
+										131 文本 实验名称
+									132 单元格
+										133 文本 演示实验 RDMA 尾延迟
+										134 文本 （虚构）
+								135 row
+									136 行标题
+										137 文本 当前进展
+									138 单元格
+										139 文本 完成基础测量；备注 <b>原样文本</b> 和 "控制组A"
+								140 row
+									141 行标题
+										142 文本 下一步
+									143 单元格
+										144 文本 核对说明；下一步：固定线程数后重新测量 P99 延迟
+								145 row
+									146 行标题
+										147 文本 召回问题
+									148 单元格
+										149 文本 上次进行到哪里，下一步是什么？
+							150 container
+								151 text 输入同时包含中文分号、字段名  下一步： 、双引号、HTML 样式标签，用来检验字段边界不会被用户文本带偏。
+							152 标题 操作步骤与预期结果, Value: 3
+								153 文本 操作步骤与预期结果
+							154 内容列表
+								155 container
+									156 AXListMarker 1.
+									157 text 创建实验 → 后端调用  POST /v1/scopes  为该实验创建独立 Scope 并持久保存映射。
+								158 container
+									159 AXListMarker 2.
+									160 text 保存进展 → 后端调用真实  POST /v1/memory/remember （ kind=decision ），响应返回  entry.citation  中的真实 entry ID 与 entry version ID。
+								161 container
+									162 AXListMarker 3.
+									163 text 召回 → 后端调用  POST /v1/context/prepare （锚点  实验进展  + 实验名称 + 用户问题），并用同一 Scope 的记忆清单补全被截断的候选；页面显示实验名称、进展、下一步与真实 entry 身份。
+								164 container
+									165 AXListMarker 4.
+									166 text 停止并重启应用进程（数据目录与 Scope 不变）→ 再次召回应恢复到 同一条  entry，进展与下一步逐字一致。
+								167 container
+									168 AXListMarker 5.
+									169 text 预期：进展与下一步与输入逐字相同，HTML 标签按字面显示， state=recalled ；无记忆、服务不可用与接口错误分别显示。
+							170 标题 实际结果, Value: 3
+								171 文本 实际结果
+							172 container
+								173 text 命令行端到端演示（ scripts/demo-run.py ，证据  evidence/demo-run-20261030T032654Z/demo-run.json ）：
+							174 表格
+								175 row
+									176 行标题
+										177 文本 Scope
+									178 单元格
+										179 文本 scp_73dng2c0cvnf7sstts1swszkwx
+								180 row
+									181 行标题
+										182 文本 写入响应 entry ID
+									183 单元格
+										184 文本 mem_ent_631e36769cad4fd09f6de0deb4f389a7
+								185 row
+									186 行标题
+										187 文本 写入响应 version ID
+									188 单元格
+										189 文本 mem_ver_f61cdac3d72446b4bc9dec8cb04d8261
+								190 row
+									191 行标题
+										192 文本 召回进展
+									193 单元格
+										194 文本 完成基础测量；备注 <b>原样文本</b> 和 "控制组A"
+								195 row
+									196 行标题
+										197 文本 召回下一步
+									198 单元格
+										199 文本 核对说明；下一步：固定线程数后重新测量 P99 延迟
+								200 row
+									201 行标题
+										202 文本 重启进程后再次召回
+									203 单元格
+										204 文本 同一条
+										205 文本 mem_ent_631e36769cad4fd09f6de0deb4f389a7
+										206 文本 ，进展与下一步逐字一致
+								207 row
+									208 行标题
+										209 文本 演示结论
+									210 单元格
+										211 文本 PASS
+										212 文本 （脚本退出码 0）
+							213 标题 自动化断言的实际输出, Value: 3
+								214 文本 自动化断言的实际输出
+							215 文本 $ python3 verification/verify_app.py
+PASS  应用启动且 PowerContext 就绪
+PASS  新实验首次召回显示无记忆
+PASS  写入 PowerContext 返回 decision Memory 条目
+PASS  召回返回实验名称、进展与下一步
+PASS  不同实验绑定不同 Scope
+PASS  实验隔离：A 的召回不含 B 的记忆
+PASS  实验隔离：B 只召回自己的进展
+PASS  重启后实验与 Scope 映射仍然存在
+PASS  重启后同一 Scope 恢复已保存进展与下一步
+PASS  空的进展或下一步被校验拒绝且不写入
+PASS  超出 8192 字节的记忆被拒绝而非截断写入
+PASS  两次被拒绝的请求没有产生新的记忆条目
+PASS  接口错误显示为 api_error 而非成功召回
+PASS  服务不可用显示 service_unavailable
+PASS  服务不可用时保存请求不伪装成功
+PASS  服务不可用时召回请求不伪装成功
+验收结论：PASS
+
+$ python3 verification/verify_save_order
+							216 container
+								217 text 以上为实际运行输出。真实失败与修复记录保留在源码的  development/  与  DEVELOPMENT_LOG.md ，验收材料索引见  EVIDENCE_INDEX.md 。
+						218 container
+							219 link 返回项目介绍, Value: experiment-recall-6htqqhz0les.qoder.website/index.html
+							220 文本  ·
+							221 link 源码仓库, Value: github.com/zhangxh0526/powercontext/tree/qoder-solution/qoder
+						222 container
+							223 link Made with Qoder，访问 Qoder 官网（新标签页）, Value: qoder.com/
+							224 按钮 隐藏水印
+			225 container 信息栏容器
+				226 container 信息栏
+					227 container
+						228 文本 “ChatGPT”已开始调试此浏览器
+						229 按钮 取消
+					230 按钮 关闭
+			231 弹出式按钮 标签页搜索
+			232 container
+				233 标签页组
+					234 标签 (selected, settable, boolean) 运行与验证说明 · 科研实验续作助手 - 内存用量 - 61.0 MB, Value: on
+						235 按钮 关闭
+			236 按钮 新标签页
+	237 关闭按钮
+	238 全屏幕按钮 Help: 此按钮也可以执行缩放窗口的操作, Secondary Actions: 缩放窗口
+	239 最小化按钮
+240 menu bar
+	241 Chrome
+	242 文件
+	243 编辑
+	244 显示
+	245 历史记录
+	246 书签
+	247 个人资料
+	248 标签页
+	249 窗口
+	250 帮助
+
+The focused UI element is 21 HTML 内容 运行与验证说明 · 科研实验续作助手, URL: experiment-recall-6htqqhz0les.qoder.website/run.html

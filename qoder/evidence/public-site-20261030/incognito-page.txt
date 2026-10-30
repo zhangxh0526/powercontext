@@ -1,0 +1,160 @@
+Window: "科研实验续作助手 · 基于 PowerContext 的实验进展记忆与召回", App: Google Chrome.
+0 标准窗口 科研实验续作助手 · 基于 PowerContext 的实验进展记忆与召回 - Google Chrome（无痕）, URL: experiment-recall-6htqqhz0les.qoder.website/, Secondary Actions: Raise
+	1 container 科研实验续作助手 · 基于 PowerContext 的实验进展记忆与召回 - Google Chrome（无痕）, URL: experiment-recall-6htqqhz0les.qoder.website/
+		2 container
+			3 工具栏
+				4 按钮 返回
+				5 按钮 (disabled) 前进
+				6 按钮 重新加载
+				7 按钮 首页
+				8 container
+					9 弹出式按钮 查看网站信息
+					10 文本栏 (settable) 地址和搜索栏, Value: experiment-recall-6htqqhz0les.qoder.website, Placeholder: 问问 Google 或输入网址
+					11 按钮 为此标签页添加书签
+				12 按钮 无痕模式（已打开 2 个窗口）
+				13 弹出式按钮 Chrome
+			14 工具栏 书签
+				15 书签按钮 百度
+				16 书签按钮 禾维 AI | 检测 Claude Gemini GPT API 中转站真假
+				17 书签文件夹按钮 所有书签
+				18 分离器 分隔符
+			19 container
+				20 滚动区
+					21 HTML 内容 科研实验续作助手 · 基于 PowerContext 的实验进展记忆与召回, URL: experiment-recall-6htqqhz0les.qoder.website/
+						22 container
+							23 文本 POWERCONTEXT 应用示例 · QODER 开发
+							24 标题 科研实验续作助手, Value: 1
+								25 文本 科研实验续作助手
+							26 文本 实验跨多天、多人、多台机器进行时，"上次做到哪、结论是什么、下一步做什么"往往散落在聊天记录和终端输出里。 本应用把每次实验进展作为可检索的 Memory 写入 PowerContext，重新打开时按实验自己的 Scope 召回原文。
+							27 container 页面导航
+								28 link 真实痛点, Value: experiment-recall-6htqqhz0les.qoder.website/#pain
+								29 link 核心功能, Value: experiment-recall-6htqqhz0les.qoder.website/#features
+								30 link 架构, Value: experiment-recall-6htqqhz0les.qoder.website/#architecture
+								31 link 实际演示, Value: experiment-recall-6htqqhz0les.qoder.website/#demo
+								32 link 运行与验证, Value: experiment-recall-6htqqhz0les.qoder.website/run.html
+								33 link 源码仓库, Value: github.com/zhangxh0526/powercontext/tree/qoder-solution/qoder
+						34 container
+							35 标题 真实痛点, Value: 2
+								36 文本 真实痛点
+							37 container
+								38 标题 重启后失去上下文, Value: 3
+									39 文本 重启后失去上下文
+								40 文本 隔天或换机器继续实验时，需要翻聊天记录、shell history 和散落的日志才知道上次改了哪个参数、哪组结果可信。
+							41 container
+								42 标题 多人多实验互相污染, Value: 3
+									43 文本 多人多实验互相污染
+								44 文本 把进展写进同一个笔记或同一个向量库里，A 实验的结论会被 B 实验的提问召回，恢复出来的"上次进展"其实属于另一个项目。
+							45 container
+								46 标题 自由文本无法稳定取回字段, Value: 3
+									47 文本 自由文本无法稳定取回字段
+								48 文本 进展和下一步里充满中文分号、字段名、引号、HTML 标签和换行。用分隔符拼接的记录会在这些字符上拆错字段，恢复出错误内容。
+							49 container
+								50 标题 "连上了"不等于"记住了", Value: 3
+									51 文本 "连上了"不等于"记住了"
+								52 文本 只展示服务连接成功的演示没有价值。必须能看到真实的写入响应、召回内容和 entry 身份，并且能区分无记忆、服务不可用和接口错误。
+							53 标题 核心功能, Value: 2
+								54 文本 核心功能
+							55 内容列表
+								56 container
+									57 text 主动保存为 decision Memory 页面填写实验名称、当前进展和下一步，由后端调用真实  POST /v1/memory/remember  写入当前实验的 Scope，不使用 localStorage 或本地 JSON 代替记忆。
+								58 container
+									59 text 按实验独立 Scope 召回 提问时组合可检索锚点  实验进展  与用户原话，通过  POST /v1/context/prepare  取回原文；不同实验绑定的 Scope 不同，互不召回。
+								60 container
+									61 text 最后一次成功保存一定能取回 相关度召回是截断的候选集，应用再用同一 Scope 的记忆清单补全比较，并按保存序号排序，避免旧记录盖过最新保存。
+								62 container
+									63 text 字段逐字保留 进展文本用带  实验进展：  前缀的结构化编码保存，中文分号、字段名、引号、HTML 样式文本与换行原样往返；旧的分隔符格式记录仍可解析，无法解析的按原文展示而不是报"没有记忆"。
+								64 container
+									65 text 重启恢复 实验与 Scope 的映射持久保存在服务端，重启进程后按同一 Scope 再次召回，恢复同一条 entry 的进展与下一步。
+								66 container
+									67 text 三种失败状态分开展示 无记忆、服务不可用（503）与接口错误（502）各自返回明确状态并在页面显示，绝不伪装成成功召回。
+								68 container
+									69 text 展示前转义 页面只用  textContent  写入召回内容，原始记忆文本按字面显示，不会被当作标记执行。
+							70 标题 架构, Value: 2
+								71 文本 架构
+							72 文本 浏览器页面  web/index.html + web/app.js
+    │  fetch（无凭据、无 localStorage 记忆）
+    ▼
+本机后端  backend/server.py（Python 3.11+ 标准库 ThreadingHTTPServer）
+    ├── backend/config.py        读取 POWERCONTEXT_URL / POWERCONTEXT_TOKEN(可选) / POWERCONTEXT_SCOPE(可选)
+    ├── backend/store.py         实验 ↔ Scope 映射（data/experiments.json，原子写入）
+    │                            以及进展文本的结构化编解码（"实验进展：" + JSON 文档）
+    └── backend/powercontext.py  OpenAPI 客户端（urllib.request）
+              │
+              ├─ POST /v1/scopes                为每个实
+							73 container
+								74 文本 凭据由后端环境变量或受保护的本地配置提供，不写入前端、源码或公开材料。公开站点不携带后端服务， 实际体验按
+								75 link 运行与验证说明, Value: experiment-recall-6htqqhz0les.qoder.website/run.html
+								76 文本 在本机完成。
+							77 标题 实际演示, Value: 2
+								78 文本 实际演示
+							79 container
+								80 text 下面是调用方在真实浏览器中完成页面验收后提供的截图：实验"RDMA 页面验收实验"保存进展后召回， 页面显示实验名称、进展、下一步、保存序号与时间、Scope、真实 entry ID 与 entry version ID， 以及 PowerContext  /v1/context/prepare  返回的原始组装内容。输入中的中文分号、字段名、 引号和 HTML 样式文本按字面显示，应用进程重启后仍恢复同一条 entry。
+							81 container
+								82 图像 科研实验续作助手页面：保存进展后从 PowerContext 召回实验名称、进展、下一步与真实 entry 身份
+								83 文本 页面验收截图由调用方提供（
+								84 文本 evidence/browser-ui-20261030/
+								85 文本 ）。演示数据为虚构实验内容。
+							86 标题 召回到的真实响应片段, Value: 3
+								87 文本 召回到的真实响应片段
+							88 container
+								89 text 摘自命令行端到端演示  scripts/demo-run.py  的  /api/experiments/<id>/recall  响应（凭据与本地服务地址不在其中）：
+							90 文本 {
+  "ok": true,
+  "state": "recalled",
+  "scope_id": "scp_73dng2c0cvnf7sstts1swszkwx",
+  "query": "实验进展 演示实验 RDMA 尾延迟 上次进行到哪里，下一步是什么？",
+  "prepared_status": "ready",
+  "latest": {
+    "entry_id": "mem_ent_631e36769cad4fd09f6de0deb4f389a7",
+    "entry_version_id": "mem_ver_f61cdac3d72446b4bc9dec8cb04d8261",
+    "text": "实验进展：{\"v\":1,\"ordinal\":1,\"saved_at\":\"2026-10-30T03:26:55.005940Z\",\"title\":\"演示实验 RDMA 尾延迟\",\"progress\":\"完成基础测量；备注 <b>原样文本</b> 和 \\\"控制组A\\\"\",\"next_step\":\"核对说明；下一步：固定线程数后重新测量
+							91 文本 本次演示未记录任何真实用户使用数据或提效数字。
+							92 标题 源码与验证, Value: 2
+								93 文本 源码与验证
+							94 内容列表
+								95 container
+									96 AXListMarker •
+									97 link 源码仓库：powercontext / qoder-solution / qoder, Value: github.com/zhangxh0526/powercontext/tree/qoder-solution/qoder
+								98 container
+									99 AXListMarker •
+									100 link 运行与验证说明：安装、配置、启动、停止、三组真实 HTTP 回归, Value: experiment-recall-6htqqhz0les.qoder.website/run.html
+								101 container
+									102 AXListMarker •
+									103 link PowerContext 服务与本任务使用的 OpenAPI 契约, Value: github.com/zhangxh0526/powercontext
+						104 container
+							105 text 科研实验续作助手 · 参赛项目 · 页面为静态展示，不包含后端或凭据。 开发过程与失败记录见源码仓库中的
+							106 文本 DEVELOPMENT_LOG.md
+							107 文本  与
+							108 文本 EVIDENCE_INDEX.md
+							109 文本 。
+						110 container
+							111 link Made with Qoder，访问 Qoder 官网（新标签页）, Value: qoder.com/
+							112 按钮 隐藏水印
+			113 container 信息栏容器
+				114 container 信息栏
+					115 container
+						116 文本 “ChatGPT”已开始调试此浏览器
+						117 按钮 取消
+					118 按钮 关闭
+			119 弹出式按钮 标签页搜索
+			120 container
+				121 标签页组
+					122 标签 (selected, settable, boolean) 科研实验续作助手 · 基于 PowerContext 的实验进展记忆与召回 - 内存用量 - 54.9 MB, Value: on
+						123 按钮 关闭
+			124 按钮 新标签页
+	125 关闭按钮
+	126 全屏幕按钮 Help: 此按钮也可以执行缩放窗口的操作, Secondary Actions: 缩放窗口
+	127 最小化按钮
+128 menu bar
+	129 Chrome
+	130 文件
+	131 编辑
+	132 显示
+	133 历史记录
+	134 书签
+	135 个人资料
+	136 标签页
+	137 窗口
+	138 帮助
+
+The focused UI element is 21 HTML 内容 科研实验续作助手 · 基于 PowerContext 的实验进展记忆与召回, URL: experiment-recall-6htqqhz0les.qoder.website/

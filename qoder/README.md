@@ -10,6 +10,9 @@
 
 ```bash
 cp config.example.env .env            # 填入自己的 POWERCONTEXT_URL
+set -a
+. ./.env                             # 将已填写的配置导出给服务与验证脚本
+set +a
 ./scripts/dev-server.sh start         # 启动，打开 http://127.0.0.1:8710/
 python3 verification/verify_app.py              # 应用主流程（空状态/写入/召回/隔离/重启/错误状态）
 python3 verification/verify_save_order.py       # 连续保存必须取回最后一次成功保存
@@ -22,16 +25,16 @@ python3 scripts/demo-run.py                     # 端到端演示：创建→保
 - `EVIDENCE_INDEX.md`：`evidence/` 中真实请求与响应的索引，以及调用方提供的页面验收材料与失败记录的位置。
 - `DEVELOPMENT_LOG.md`：开发过程记录（含踩坑与失败修复顺序），属过程材料，不作为验收结论。
 - `development/QODER_SESSION.md`：从真实 Qoder 会话提取的可见消息、工具操作与执行回执。
-- `site/`：可静态发布的展示站（项目简介、真实痛点、核心功能、架构、实际演示、运行与验证说明入口），不含本地服务地址或 token。
+- `site/`：项目展示站源文件，已由 Qoder Sites 发布为任何人可访问：
+  [科研实验续作助手](https://experiment-recall-6htqqhz0les.qoder.website/)（项目简介、真实痛点、核心功能、架构、实际演示、运行与验证说明入口）。
+  发布过程、站点 ID、部署状态与访问策略见 [SITE_PUBLICATION.md](SITE_PUBLICATION.md)。
 - 目录结构：`backend/`（标准库后端与 PowerContext 客户端、进展文本编解码）、`web/`（页面）、
   `verification/`（真实 HTTP 验收脚本）、`scripts/`（开发服务与演示脚本）、`reference/powercontext.yaml`（契约）。
 
-## 提交前检查
+## 交付与验证
 
-- 网站由 Qoder Sites 发布，在无痕窗口不登录可访问；不要暂停或删除已提交站点。
-- 项目按运行说明可启动，页面能完成保存、召回和重启恢复，不是静态演示截图。
-- 展示 PowerContext 的实际作用，包含真实记忆响应或日志。
-- 提供完整源码、配置示例、运行说明、验证样例和实际结果。
-- 提供 Qoder 关键开发记录及 UID：`01a1876e-63bd-7a90-86af-11e66ea03c61`。
-- 提交 Qoder Sites 完整网址、源码仓库和 UID，并上传要求的验证材料。
-- 不提交真实 API Key、密码或私有实验数据，不虚构用户反馈和使用效果。
+- Qoder Sites 站点处于 active、public；真实 Chrome 无痕窗口免登录访问首页和运行说明已通过，证据见 `evidence/public-site-20261030/`。
+- 应用主流程 16 项、连续保存 5 项、文本往返 18 项真实 HTTP 断言全部通过；端到端演示验证进程重启后恢复同一条 entry。
+- 实际 Chrome 页面验收覆盖保存、召回、特殊文本显示和重启恢复，证据见 `evidence/browser-ui-20261030/`。
+- Qoder 账号 UID：`01a1876e-63bd-7a90-86af-11e66ea03c61`。开发材料包含真实 CLI 可见会话、执行回执和带事件编号的文字摘录截图。
+- 公开站点提供项目展示；实际应用按运行说明在本机运行。未收集真实用户数量或提效统计。

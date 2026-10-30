@@ -25,9 +25,17 @@
 ## Qoder 开发与复核记录
 
 - [可见 Qoder 会话记录](development/QODER_SESSION.md)：真实可见助手消息、工具操作和执行回执。
+- [关键会话文字截图](development/QODER_EXCERPTS.jpg)：从上述记录提取的真实可见消息，附来源文件与事件编号；这是文字记录的排版截图，不是 Qoder GUI 屏幕截图。[对应 HTML](development/QODER_EXCERPTS.html) 可直接阅读。
 - [开发过程记录](DEVELOPMENT_LOG.md)：需求拆解、实现和调试过程。
 - `development/validation/initial-save-order-failure.json`：实际观察到的原始失败，8 组中 4 组返回旧记录。
 - `development/validation/save-order-and-text-review.json`：保存顺序修复后 8 组通过，并保留文本分隔缺陷的实际输入和输出。
 - 其余完整原始 Qoder 日志保留在所有者 Linux PC 的 `/home/legend/seekdb-competition/qoder-records/`，不作为应用运行依赖。
 
 开发过程中的失败与调试记录用于追溯，不作为通过结果。项目没有真实用户数量或提效统计，也未据此作出效果主张。
+
+## Qoder Sites 公开发布
+
+- 正式地址：<https://experiment-recall-6htqqhz0les.qoder.website/>。
+- `evidence/public-site-20261030/acceptance.json`：Qoder CLI 确认站点处于 active、public，首页、运行说明、CSS 与图片的免认证 HTTPS 请求均为 200。
+- `evidence/public-site-20261030/incognito-home.png` 与 `incognito-run.png`：实际 Chrome 无痕窗口无需登录访问首页和运行说明；对应可见页面文字保存在同目录。
+- 网站是项目展示页。应用后端在本机运行，操作流程与真实服务验收材料随源码提供。

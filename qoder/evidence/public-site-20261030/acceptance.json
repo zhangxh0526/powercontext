@@ -1,0 +1,48 @@
+{
+  "checked_at_utc": "2026-10-30T07:39:55.421958+00:00",
+  "url": "https://experiment-recall-6htqqhz0les.qoder.website/",
+  "method": "Unauthenticated HTTPS HEAD with no cookie or Authorization header",
+  "http_checks": [
+    {
+      "path": "/",
+      "status": 200,
+      "final_url": "https://experiment-recall-6htqqhz0les.qoder.website/",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "path": "/run.html",
+      "status": 200,
+      "final_url": "https://experiment-recall-6htqqhz0les.qoder.website/run.html",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "path": "/styles.css",
+      "status": 200,
+      "final_url": "https://experiment-recall-6htqqhz0les.qoder.website/styles.css",
+      "content_type": "text/css; charset=utf-8"
+    },
+    {
+      "path": "/assets/application.jpg",
+      "status": 200,
+      "final_url": "https://experiment-recall-6htqqhz0les.qoder.website/assets/application.jpg",
+      "content_type": "image/jpeg"
+    }
+  ],
+  "browser": {
+    "tool": "Codex CUA",
+    "mode": "Chrome Incognito",
+    "home_loaded_without_login": true,
+    "run_page_loaded_without_login": true,
+    "home_screenshot": "incognito-home.png",
+    "run_screenshot": "incognito-run.png"
+  },
+  "verdict": "PASS",
+  "hosting": {
+    "verified_by": "Qoder CLI sites list",
+    "project_id": "01a18bbb-983e-7078-9551-5d4ae2ba7b36",
+    "site_id": "01a18bbb-9840-76f5-a34b-52c8aa319ca2",
+    "status": "active",
+    "access_mode": "public",
+    "hasPublishedContent": true
+  }
+}
