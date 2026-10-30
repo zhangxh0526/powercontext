@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>运行与验证说明 · 科研实验续作助手</title>
+    <meta name="description" content="科研实验续作助手的安装、配置、启动、停止与真实 HTTP 验证说明，含具体初始数据、操作步骤、预期结果与实际结果。" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="site-header compact">
+      <div class="wrap">
+        <p class="eyebrow"><a href="/index.html">科研实验续作助手</a> · 运行与验证</p>
+        <h1>运行与验证说明</h1>
+        <p class="lede">按本页说明在自己的环境运行应用并验证真实写入与召回。展示站不承载应用后端；服务地址和凭据由运行者配置。</p>
+        <nav class="tabs" aria-label="页面导航">
+          <a href="#requirement">环境要求</a>
+          <a href="#config">配置</a>
+          <a href="#start">启动与停止</a>
+          <a href="#verify">真实 HTTP 验证</a>
+          <a href="#sample">验证样例</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <section id="requirement">
+        <h2>环境要求</h2>
+        <ul>
+          <li>Python 3.11 或更高版本（应用只用标准库，没有 pip 依赖）。</li>
+          <li>一个可访问的 PowerContext 服务，OpenAPI 版本 v1.2.0，能力包含 <code>/v1/memory/remember</code>、<code>/v1/context/prepare</code>、<code>/v1/memory/entries/list</code>。</li>
+          <li>bash 与 curl（可选，用于演示脚本）。</li>
+        </ul>
+        <pre><code>git clone --branch qoder-solution https://github.com/zhangxh0526/powercontext.git
+cd powercontext/qoder
+python3 --version    # 需要 &gt;= 3.11</code></pre>
+      </section>
+
+      <section id="config">
+        <h2>配置</h2>
+        <p>复制配置示例并按自己的环境填写。示例文件不含任何真实凭据。</p>
+        <pre><code>cp config.example.env .env   # .env 已在 .gitignore 中</code></pre>
+        <table>
+          <caption>配置项</caption>
+          <thead>
+            <tr><th>变量</th><th>必填</th><th>说明</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>POWERCONTEXT_URL</code></td><td>是</td>
+              <td>PowerContext 服务地址，必须是 http 或 https URL。未设置时使用 <code>http://127.0.0.1:8000</code>。</td>
+            </tr>
+            <tr>
+              <td><code>POWERCONTEXT_TOKEN</code></td><td>否</td>
+              <td>服务启用鉴权时设置。只作为请求头发送，绝不写入日志、证据或页面。</td>
+            </tr>
+            <tr>
+              <td><code>POWERCONTEXT_SCOPE</code></td><td>否</td>
+              <td>仅可作为"默认实验"的 Scope 复用来源。留空时每个实验都会创建并持久保存自己的 Scope；不会让所有实验共用一个 Scope。</td>
+            </tr>
+            <tr>
+              <td><code>ASSISTANT_HOST</code> / <code>ASSISTANT_PORT</code></td><td>否</td>
+              <td>应用监听地址与端口，默认 <code>127.0.0.1:8710</code>。</td>
+            </tr>
+            <tr>
+              <td><code>ASSISTANT_DATA_DIR</code></td><td>否</td>
+              <td>实验与 Scope 映射目录，默认项目下的 <code>data/</code>，还包含保存时的表单元数据。召回始终读取 PowerContext。</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="start">
+        <h2>启动与停止</h2>
+        <h3>前台启动</h3>
+        <pre><code>cd powercontext/qoder
+export POWERCONTEXT_URL='http://127.0.0.1:8000'  # 改为已有服务的地址
+python3 -m backend.server
+# 浏览器打开 http://127.0.0.1:8710/，Ctrl-C 停止</code></pre>
+        <h3>后台服务脚本</h3>
+        <p>未导出 <code>POWERCONTEXT_URL</code> 时读取本地 <code>.env</code>；已导出时使用完整的进程环境配置。</p>
+        <pre><code>./scripts/dev-server.sh start     # 启动并等待 /api/health 就绪
+./scripts/dev-server.sh status    # 查看进程与健康状态
+./scripts/dev-server.sh logs 50   # 查看最近 50 行日志
+./scripts/dev-server.sh restart   # 重启（用于验证重启恢复）
+./scripts/dev-server.sh stop      # 停止</code></pre>
+        <p>pid 记录在 <code>runtime/dev-server.pid</code>，日志在 <code>runtime/dev-server.log</code>，两者都被忽略提交。</p>
+      </section>
+
+      <section id="verify">
+        <h2>真实 HTTP 验证</h2>
+        <p>三个脚本都自行启动应用、发送真实 HTTP 请求、断言结果，并在失败时以非零状态退出；请求与响应写入 <code>evidence/</code>。只用命令行，不涉及浏览器自动化。</p>
+        <pre><code>export POWERCONTEXT_URL='http://127.0.0.1:8000'  # 改为已有服务的地址
+
+python3 verify_powercontext.py                  # 独立验证服务本身的写入与召回
+python3 verification/verify_app.py              # 应用主流程：空状态、写入、召回、隔离、重启恢复、错误状态
+python3 verification/verify_save_order.py       # 连续保存回归：最新一次成功保存必须被召回
+python3 verification/verify_text_roundtrip.py   # 文本往返回归：分号/字段名/引号/HTML/换行逐字一致
+
+./scripts/dev-server.sh start
+python3 scripts/demo-run.py                     # 端到端演示：创建→保存→召回→重启进程→再召回</code></pre>
+        <p class="note">页面交互与截图由项目验收方在自己的浏览器中完成，结果保存在 <code>evidence/browser-ui-20261030/</code>。</p>
+      </section>
+
+      <section id="sample">
+        <h2>验证样例</h2>
+        <p>下面这组数据、步骤、预期与实际结果来自真实的命令行端到端演示，实际结果逐字摘自对应证据文件。</p>
+
+        <h3>初始数据</h3>
+        <table>
+          <tbody>
+            <tr><th>实验名称</th><td><code>演示实验 RDMA 尾延迟</code>（虚构）</td></tr>
+            <tr><th>当前进展</th><td><code>完成基础测量；备注 &lt;b&gt;原样文本&lt;/b&gt; 和 "控制组A"</code></td></tr>
+            <tr><th>下一步</th><td><code>核对说明；下一步：固定线程数后重新测量 P99 延迟</code></td></tr>
+            <tr><th>召回问题</th><td><code>上次进行到哪里，下一步是什么？</code></td></tr>
+          </tbody>
+        </table>
+        <p>输入同时包含中文分号、字段名 <code>下一步：</code>、双引号、HTML 样式标签，用来检验字段边界不会被用户文本带偏。</p>
+
+        <h3>操作步骤与预期结果</h3>
+        <ol class="steps">
+          <li>创建实验 → 后端调用 <code>POST /v1/scopes</code> 为该实验创建独立 Scope 并持久保存映射。</li>
+          <li>保存进展 → 后端调用真实 <code>POST /v1/memory/remember</code>（<code>kind=decision</code>），响应返回 <code>entry.citation</code> 中的真实 entry ID 与 entry version ID。</li>
+          <li>召回 → 后端调用 <code>POST /v1/context/prepare</code>（锚点 <code>实验进展</code> + 实验名称 + 用户问题），并用同一 Scope 的记忆清单补全被截断的候选；页面显示实验名称、进展、下一步与真实 entry 身份。</li>
+          <li>停止并重启应用进程（数据目录与 Scope 不变）→ 再次召回应恢复到<em>同一条</em> entry，进展与下一步逐字一致。</li>
+          <li>预期：进展与下一步与输入逐字相同，HTML 标签按字面显示，<code>state=recalled</code>；无记忆、服务不可用与接口错误分别显示。</li>
+        </ol>
+
+        <h3>实际结果</h3>
+        <p>命令行端到端演示（<code>scripts/demo-run.py</code>，证据 <code>evidence/demo-run-20261030T032654Z/demo-run.json</code>）：</p>
+        <table>
+          <tbody>
+            <tr><th>Scope</th><td><code>scp_73dng2c0cvnf7sstts1swszkwx</code></td></tr>
+            <tr><th>写入响应 entry ID</th><td><code>mem_ent_631e36769cad4fd09f6de0deb4f389a7</code></td></tr>
+            <tr><th>写入响应 version ID</th><td><code>mem_ver_f61cdac3d72446b4bc9dec8cb04d8261</code></td></tr>
+            <tr><th>召回进展</th><td><code>完成基础测量；备注 &lt;b&gt;原样文本&lt;/b&gt; 和 "控制组A"</code></td></tr>
+            <tr><th>召回下一步</th><td><code>核对说明；下一步：固定线程数后重新测量 P99 延迟</code></td></tr>
+            <tr><th>重启进程后再次召回</th><td>同一条 <code>mem_ent_631e36769cad4fd09f6de0deb4f389a7</code>，进展与下一步逐字一致</td></tr>
+            <tr><th>演示结论</th><td><code>PASS</code>（脚本退出码 0）</td></tr>
+          </tbody>
+        </table>
+
+        <h3>自动化断言的实际输出</h3>
+        <pre><code>$ python3 verification/verify_app.py
+PASS  应用启动且 PowerContext 就绪
+PASS  新实验首次召回显示无记忆
+PASS  写入 PowerContext 返回 decision Memory 条目
+PASS  召回返回实验名称、进展与下一步
+PASS  不同实验绑定不同 Scope
+PASS  实验隔离：A 的召回不含 B 的记忆
+PASS  实验隔离：B 只召回自己的进展
+PASS  重启后实验与 Scope 映射仍然存在
+PASS  重启后同一 Scope 恢复已保存进展与下一步
+PASS  空的进展或下一步被校验拒绝且不写入
+PASS  超出 8192 字节的记忆被拒绝而非截断写入
+PASS  两次被拒绝的请求没有产生新的记忆条目
+PASS  接口错误显示为 api_error 而非成功召回
+PASS  服务不可用显示 service_unavailable
+PASS  服务不可用时保存请求不伪装成功
+PASS  服务不可用时召回请求不伪装成功
+验收结论：PASS
+
+$ python3 verification/verify_save_order.py
+PASS  同一秒连续保存 8 组全部召回 SECOND：失败 0 组
+PASS  单个实验 12 次保存后召回最新一次（候选集截断不影响结果）
+PASS  连续 24 次保存内每次召回都恢复最新一次成功保存
+PASS  相关度召回漏掉最新保存时由 Scope 记忆清单补全恢复
+PASS  应用重启后仍恢复最后一次成功保存
+连续保存回归结论：PASS
+
+$ python3 verification/verify_text_roundtrip.py
+PASS  保存响应在 entry.citation 中返回真实 entry/version ID
+PASS  中文分号与字段名不再拆错字段（progress 逐字一致）
+PASS  中文分号与字段名不再拆错字段（next_step 逐字一致）
+PASS  召回条目使用结构化编码且可解析
+PASS  召回使用保存响应返回的同一 entry 身份
+PASS  实验名称中的锚点与字段名完整保留
+PASS  引号、HTML 样式文本与换行在 progress 中逐字保留
+PASS  JSON 样式与反斜杠在 next_step 中逐字保留
+PASS  PowerContext 原文仍带可检索的实验进展锚点
+PASS  旧分隔符记录仍被识别为已召回而非无记忆
+PASS  旧分隔符记录的进展与下一步仍按旧格式解析
+PASS  新保存的序号在旧记录之后且成为最新条目
+PASS  带锚点但无法解析的记录不被当作无记忆
+PASS  不可解析记录标记为 undecodable 并给出原文警告
+PASS  不可解析记录按 PowerContext 原文完整保留
+PASS  不可解析记录不影响最新成功保存的召回
+PASS  重启后含中文分号的进展与下一步仍逐字一致
+PASS  重启后引号、HTML 样式文本与换行仍逐字一致
+文本往返回归结论：PASS</code></pre>
+        <p class="note">
+          以上为实际运行输出。真实失败与修复记录保留在源码的 <code>development/</code> 与
+          <code>DEVELOPMENT_LOG.md</code>，验收材料索引见 <code>EVIDENCE_INDEX.md</code>。
+        </p>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap">
+        <p><a href="/index.html">返回项目介绍</a> · <a href="https://github.com/zhangxh0526/powercontext/tree/qoder-solution/qoder">源码仓库</a></p>
+      </div>
+    </footer>
+  </body>
+</html>

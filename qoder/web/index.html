@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>科研实验续作助手</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header>
+      <div>
+        <h1>科研实验续作助手</h1>
+        <p class="subtitle">实验进展写入 PowerContext Memory，重新打开时按实验 Scope 召回。</p>
+      </div>
+      <div id="service-status" class="status">正在检查 PowerContext……</div>
+    </header>
+
+    <main>
+      <section class="panel">
+        <h2>1. 实验</h2>
+        <form id="create-form">
+          <label for="experiment-title">实验名称</label>
+          <input id="experiment-title" name="title" maxlength="80" placeholder="例如：RDMA 小消息延迟复测" required />
+          <label class="checkbox">
+            <input id="use-configured-scope" type="checkbox" />
+            <span>复用 POWERCONTEXT_SCOPE 作为默认实验 Scope（可选；仅默认实验）</span>
+          </label>
+          <button type="submit">创建实验并绑定独立 Scope</button>
+        </form>
+        <p class="hint" id="scope-hint"></p>
+        <ul id="experiment-list" class="experiment-list"></ul>
+        <p id="current-experiment" class="current">尚未选择实验。</p>
+      </section>
+
+      <section class="panel">
+        <h2>2. 保存进展</h2>
+        <form id="save-form">
+          <label for="progress">当前进展</label>
+          <textarea id="progress" rows="4" placeholder="已完成 4KB 与 64KB 消息对比，P99 延迟偏高。"></textarea>
+          <label for="next-step">下一步</label>
+          <textarea id="next-step" rows="3" placeholder="固定线程数后重新测量 P99 延迟。"></textarea>
+          <button type="submit" id="save-button">保存到 PowerContext</button>
+        </form>
+        <p id="save-result" class="result"></p>
+      </section>
+
+      <section class="panel">
+        <h2>3. 召回上次进展</h2>
+        <form id="recall-form">
+          <label for="question">问题</label>
+          <input id="question" maxlength="200" value="上次进行到哪里，下一步是什么？" />
+          <button type="submit" id="recall-button">召回</button>
+        </form>
+        <p id="recall-state" class="result"></p>
+        <p id="recall-warning" class="result warning" hidden></p>
+        <div id="recall-card" class="recall-card" hidden>
+          <dl>
+            <dt>实验名称</dt><dd id="recalled-title"></dd>
+            <dt>进展</dt><dd id="recalled-progress"></dd>
+            <dt>下一步</dt><dd id="recalled-next"></dd>
+            <dt>保存序号 / 时间</dt><dd id="recalled-saved-at"></dd>
+            <dt>文本编码</dt><dd id="recalled-codec"></dd>
+            <dt>Scope</dt><dd id="recalled-scope"></dd>
+            <dt>entry ID</dt><dd id="recalled-entry"></dd>
+            <dt>entry version ID</dt><dd id="recalled-version"></dd>
+            <dt>召回查询</dt><dd id="recalled-query"></dd>
+            <dt>最新条目来源</dt><dd id="recalled-source"></dd>
+          </dl>
+          <h3>PowerContext 返回的召回内容</h3>
+          <pre id="recalled-content"></pre>
+        </div>
+        <h3 id="entries-heading" hidden>本 Scope 召回到的记忆条目</h3>
+        <ul id="entry-list"></ul>
+      </section>
+    </main>
+
+    <footer>
+      <p>页面只通过本机后端访问 PowerContext；记忆内容保存在服务端 Scope 中，不使用 localStorage。</p>
+    </footer>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

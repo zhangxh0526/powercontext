@@ -1,0 +1,57 @@
+{
+  "experiments": {
+    "b-b-19aa60-7ee675": {
+      "created_at": "2026-10-30T03:28:45.426030Z",
+      "entry_id": "mem_ent_af97116bea7e420b9815efa5ad53f34a",
+      "entry_version_id": "mem_ver_7e67ea1f799a4510bd0d19cc55479d49",
+      "id": "b-b-19aa60-7ee675",
+      "next_step": "下一步里也有 进展：与 ；分隔符，还有 {\"json\": \"样式\"} 和 \\ 反斜杠（e23c2460）",
+      "ordinal": 1,
+      "progress": "包含 \"双引号\"、'单引号'、中文分号；以及 HTML：<img src=x onerror=alert(1)>\n第二行保留换行（e23c2460）",
+      "saved_at": "2026-10-30T03:28:45.428751Z",
+      "scope_id": "scp_637gb73s3bnf73b3yc262wrvt6",
+      "scope_origin": "created",
+      "title": "文本往返验收 实验进展；进展：<b>标签</b> \"19aa60\""
+    },
+    "experiment-588e6a": {
+      "created_at": "2026-10-30T03:28:45.859476Z",
+      "entry_id": "mem_ent_3af6cddf279e45ba8607244999802ff6",
+      "entry_version_id": "mem_ver_771f8e006e4d49d586f6f6f773d424b1",
+      "id": "experiment-588e6a",
+      "next_step": "确认最新保存优先（0b9dd566）",
+      "ordinal": 1,
+      "progress": "在不可解析记录之后保存（0b9dd566）",
+      "saved_at": "2026-10-30T03:28:45.985818Z",
+      "scope_id": "scp_0r1ear76agjrx2yc9zh4kj27ba",
+      "scope_origin": "created",
+      "title": "不可解析锚点记录验收"
+    },
+    "experiment-643925": {
+      "created_at": "2026-10-30T03:28:45.283570Z",
+      "entry_id": "mem_ent_eacae97d17e043d59111c32a4aaf8396",
+      "entry_version_id": "mem_ver_a011be80d5b844fa8b053506e3b53a17",
+      "id": "experiment-643925",
+      "next_step": "核对说明；下一步：重新测量（da222ee4）",
+      "ordinal": 1,
+      "progress": "完成基础测量（da222ee4）",
+      "saved_at": "2026-10-30T03:28:45.285971Z",
+      "scope_id": "scp_0aw638mggm2wgn0xr5nx8sbdfd",
+      "scope_origin": "created",
+      "title": "文本往返验收 中文分号"
+    },
+    "experiment-6a17dd": {
+      "created_at": "2026-10-30T03:28:45.564198Z",
+      "entry_id": "mem_ent_85d0394b1b4e4112b1129d230d03e744",
+      "entry_version_id": "mem_ver_a90934003db145039f9d20fc59f97b5a",
+      "id": "experiment-6a17dd",
+      "next_step": "新格式下一步（afc016cf）",
+      "ordinal": 4,
+      "progress": "新格式覆盖旧记录（afc016cf）；下一步：仍保持原样",
+      "saved_at": "2026-10-30T03:28:45.688638Z",
+      "scope_id": "scp_5yr5n8akk8wyrm8pgea237x7zr",
+      "scope_origin": "created",
+      "title": "历史编码兼容验收"
+    }
+  },
+  "version": 1
+}

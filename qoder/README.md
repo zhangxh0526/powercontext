@@ -1,24 +1,30 @@
 # Qoder：科研实验续作助手
 
-本目录提供项目任务书和独立的 PowerContext 验证工具。应用主体需要在 Qoder 中开发，并通过 Qoder Sites 发布；任务书和静态文件检查不能代替可运行项目。
+保存科研实验的当前进展与下一步，在重新打开应用后继续上次实验。Python 标准库后端通过真实 PowerContext 保存 decision Memory、按独立 Scope 召回，并展示记忆条目的身份和原文。页面包含空状态与错误状态，支持实验隔离和重启恢复。
 
-## 在 Qoder 中开始
+主体设计、编码和调试使用 Qoder CLI；真实 HTTP 验收、浏览器截图与开发记录随源码提供。`site/` 是项目展示页，应用在本机运行。
 
-1. 用 Qoder 打开本目录，将 `QODER_TASK.md` 的完整内容交给 Qoder，保留需求拆解、编码和调试对话。
-2. 按 Qoder 生成的项目说明配置和启动 PowerContext 与应用。真实服务地址和 token 只放在本地环境变量或受保护的配置中。
-3. 先运行独立服务验证，再运行 Qoder 编写的项目主流程验证。应用必须实际保存并召回实验进展，不能只显示连接成功。
-4. 重新启动应用，保持相同 Scope，再次确认原进展和下一步能恢复。
-5. 保存真实响应、应用日志、页面截图和关键 Qoder 对话。审核项目后，在个人账号中使用 Qoder Sites 发布 `site/`，可见范围选择“任何人都可访问”。
+## 运行
 
-独立服务验证：
+需要 Python 3.11+ 和已运行的 PowerContext 服务，应用本身没有额外 pip 依赖。完整准备步骤见 [运行与验证说明](RUN_AND_VERIFY.md)。
 
 ```bash
-export POWERCONTEXT_URL=http://127.0.0.1:8000
-# 如果服务启用了鉴权，在本地另行设置 POWERCONTEXT_TOKEN。
-python3 verify_powercontext.py
+cp config.example.env .env            # 填入自己的 POWERCONTEXT_URL
+./scripts/dev-server.sh start         # 启动，打开 http://127.0.0.1:8710/
+python3 verification/verify_app.py              # 应用主流程（空状态/写入/召回/隔离/重启/错误状态）
+python3 verification/verify_save_order.py       # 连续保存必须取回最后一次成功保存
+python3 verification/verify_text_roundtrip.py   # 分号/字段名/引号/HTML/换行逐字往返
+python3 scripts/demo-run.py                     # 端到端演示：创建→保存→召回→重启→再召回
+./scripts/dev-server.sh stop          # 停止
 ```
 
-脚本成功时输出实际 Scope、写入与召回响应，以及 `PASS`。同一 Scope 重复运行是幂等写入，`remembered.entry` 为 `null` 表示该内容已经存在，不代表写入失败。此脚本验证 PowerContext 服务，不验证尚未实现的 Qoder 应用。
+- `RUN_AND_VERIFY.md`：安装、配置、启动、停止、验证说明，含具体初始数据、步骤、预期与实际结果。
+- `EVIDENCE_INDEX.md`：`evidence/` 中真实请求与响应的索引，以及调用方提供的页面验收材料与失败记录的位置。
+- `DEVELOPMENT_LOG.md`：开发过程记录（含踩坑与失败修复顺序），属过程材料，不作为验收结论。
+- `development/QODER_SESSION.md`：从真实 Qoder 会话提取的可见消息、工具操作与执行回执。
+- `site/`：可静态发布的展示站（项目简介、真实痛点、核心功能、架构、实际演示、运行与验证说明入口），不含本地服务地址或 token。
+- 目录结构：`backend/`（标准库后端与 PowerContext 客户端、进展文本编解码）、`web/`（页面）、
+  `verification/`（真实 HTTP 验收脚本）、`scripts/`（开发服务与演示脚本）、`reference/powercontext.yaml`（契约）。
 
 ## 提交前检查
 

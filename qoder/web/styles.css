@@ -1,0 +1,132 @@
+:root {
+  --bg: #f4f6fa;
+  --panel: #ffffff;
+  --ink: #1d2430;
+  --muted: #5c6878;
+  --line: #d8e0ea;
+  --ok: #1c7a45;
+  --warn: #a06400;
+  --err: #a8201c;
+  --accent: #1f5fbf;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "Noto Sans CJK SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.6;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 24px clamp(16px, 4vw, 48px);
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+}
+
+h1 { margin: 0 0 4px; font-size: 24px; }
+h2 { margin: 0 0 14px; font-size: 18px; }
+h3 { margin: 18px 0 8px; font-size: 14px; color: var(--muted); }
+.subtitle { margin: 0; color: var(--muted); font-size: 14px; }
+
+main {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+  padding: 24px clamp(16px, 4vw, 48px);
+  align-items: start;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+label { display: block; font-size: 14px; margin-bottom: 6px; color: var(--muted); }
+input, textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font: inherit;
+  margin-bottom: 12px;
+  background: #fbfcfe;
+}
+textarea { resize: vertical; }
+
+button {
+  font: inherit;
+  padding: 9px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+}
+button:disabled { opacity: .55; cursor: progress; }
+
+.checkbox { display: flex; align-items: flex-start; gap: 8px; color: var(--muted); margin-bottom: 12px; }
+.checkbox input { width: auto; margin: 4px 0 0; }
+
+.status {
+  font-size: 13px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  white-space: normal;
+  max-width: 460px;
+}
+.status.ok { color: var(--ok); border-color: #b7e0c6; background: #f0fbf4; }
+.status.error { color: var(--err); border-color: #f0c3c1; background: #fdf2f1; }
+.status.pending { color: var(--muted); }
+
+.result { min-height: 22px; font-size: 14px; margin: 10px 0 0; }
+.result.success { color: var(--ok); }
+.result.warning { color: var(--warn); }
+.result.error { color: var(--err); }
+.result.pending { color: var(--muted); }
+.hint { font-size: 13px; color: var(--muted); }
+.current { font-size: 14px; color: var(--accent); font-weight: 600; }
+
+.experiment-list { list-style: none; padding: 0; margin: 0 0 8px; }
+.experiment-list li { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
+.experiment-list button.select {
+  background: #eef3fb;
+  color: var(--ink);
+  border-color: var(--line);
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.experiment-list button.selected { background: var(--accent); color: #fff; border-color: var(--accent); }
+.scope { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: var(--muted); overflow-wrap: anywhere; }
+.empty { color: var(--muted); font-size: 14px; }
+
+.recall-card { border: 1px solid var(--line); border-radius: 10px; padding: 16px; background: #f8fbff; margin-top: 12px; }
+dl { display: grid; grid-template-columns: 130px 1fr; gap: 6px 12px; margin: 0; font-size: 14px; }
+dt { color: var(--muted); }
+dd { margin: 0; overflow-wrap: anywhere; }
+pre {
+  background: #0f1620;
+  color: #e6edf6;
+  padding: 12px;
+  border-radius: 8px;
+  overflow: auto;
+  font-size: 12px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+#entry-list { list-style: none; padding: 0; margin: 0; }
+#entry-list li { border-top: 1px dashed var(--line); padding: 10px 0; font-size: 13px; }
+#entry-list strong { display: block; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: var(--accent); overflow-wrap: anywhere; }
+#entry-list span { display: block; overflow-wrap: anywhere; }
+
+footer { padding: 0 clamp(16px, 4vw, 48px) 32px; color: var(--muted); font-size: 13px; }

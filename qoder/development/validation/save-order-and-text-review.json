@@ -1,0 +1,82 @@
+{
+  "cases": [
+    {
+      "expected": "SECOND",
+      "actual": "SECOND",
+      "first_saved_at": "2026-10-30T02:49:03.116390Z",
+      "second_saved_at": "2026-10-30T02:49:03.145673Z",
+      "first_entry": "mem_ent_c1b951e1aa56450e95c4c0085474c3df",
+      "second_entry": "mem_ent_04e2ceb984924536a3d8ed145c73a027"
+    },
+    {
+      "expected": "SECOND",
+      "actual": "SECOND",
+      "first_saved_at": "2026-10-30T02:49:03.262627Z",
+      "second_saved_at": "2026-10-30T02:49:03.289334Z",
+      "first_entry": "mem_ent_7771b14aa41b4cf1af9ebbcc9b552ad5",
+      "second_entry": "mem_ent_e8a767b8b8de454ba7575a797b6aa2a1"
+    },
+    {
+      "expected": "SECOND",
+      "actual": "SECOND",
+      "first_saved_at": "2026-10-30T02:49:03.398472Z",
+      "second_saved_at": "2026-10-30T02:49:03.424444Z",
+      "first_entry": "mem_ent_aa1a5ea3bea34e8cb0f97b685619b9bd",
+      "second_entry": "mem_ent_2754ef6d0ead440aa862ca777c2c9e2e"
+    },
+    {
+      "expected": "SECOND",
+      "actual": "SECOND",
+      "first_saved_at": "2026-10-30T02:49:03.541044Z",
+      "second_saved_at": "2026-10-30T02:49:03.567065Z",
+      "first_entry": "mem_ent_c3e2ebcdc6484672869eaa42c1cd3e8e",
+      "second_entry": "mem_ent_da2ec95cdb8949eca22d48f04747b63e"
+    },
+    {
+      "expected": "SECOND",
+      "actual": "SECOND",
+      "first_saved_at": "2026-10-30T02:49:03.679179Z",
+      "second_saved_at": "2026-10-30T02:49:03.705116Z",
+      "first_entry": "mem_ent_75a352a2c522407891921f7c2b6f592e",
+      "second_entry": "mem_ent_1e7e76593f164c11a9251eddf8764d5c"
+    },
+    {
+      "expected": "SECOND",
+      "actual": "SECOND",
+      "first_saved_at": "2026-10-30T02:49:03.821168Z",
+      "second_saved_at": "2026-10-30T02:49:03.846594Z",
+      "first_entry": "mem_ent_8c7849680e3940b591db61a3d53b5e80",
+      "second_entry": "mem_ent_a1892e907e0d44bd99c035267761db5c"
+    },
+    {
+      "expected": "SECOND",
+      "actual": "SECOND",
+      "first_saved_at": "2026-10-30T02:49:03.955340Z",
+      "second_saved_at": "2026-10-30T02:49:03.981395Z",
+      "first_entry": "mem_ent_61c6ad52abf847b38ec45d40fee33149",
+      "second_entry": "mem_ent_86566c29764d4e99ac42f9d4cf7af67d"
+    },
+    {
+      "expected": "SECOND",
+      "actual": "SECOND",
+      "first_saved_at": "2026-10-30T02:49:04.095855Z",
+      "second_saved_at": "2026-10-30T02:49:05.293538Z",
+      "first_entry": "mem_ent_a157dfc57bbb4ef09e1f04098c25fb49",
+      "second_entry": "mem_ent_9bbc753cb09345b297700c84cb2b058b"
+    }
+  ],
+  "failures": 0,
+  "text_roundtrip": {
+    "expected": {
+      "progress": "完成基础测量",
+      "next_step": "核对说明；下一步：重新测量"
+    },
+    "actual": {
+      "title": "文本往返验收ef41676d",
+      "ordinal": "1",
+      "saved_at": "2026-10-30T02:49:05.408507Z",
+      "progress": "完成基础测量；下一步：核对说明",
+      "next_step": "重新测量"
+    }
+  }
+}

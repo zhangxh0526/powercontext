@@ -1,0 +1,57 @@
+{
+  "experiments": {
+    "b-b-720b14-608c49": {
+      "created_at": "2026-10-30T03:23:51.541323Z",
+      "entry_id": "mem_ent_480a72b66c3e4405a45a7edac1c868e5",
+      "entry_version_id": "mem_ver_25ab9003b87943a491a524e37a9fac24",
+      "id": "b-b-720b14-608c49",
+      "next_step": "下一步里也有 进展：与 ；分隔符，还有 {\"json\": \"样式\"} 和 \\ 反斜杠（47928591）",
+      "ordinal": 1,
+      "progress": "包含 \"双引号\"、'单引号'、中文分号；以及 HTML：<img src=x onerror=alert(1)>\n第二行保留换行（47928591）",
+      "saved_at": "2026-10-30T03:23:51.543464Z",
+      "scope_id": "scp_06fk7bz22xk2bf4gvea4nrpf27",
+      "scope_origin": "created",
+      "title": "文本往返验收 实验进展；进展：<b>标签</b> \"720b14\""
+    },
+    "experiment-08dc96": {
+      "created_at": "2026-10-30T03:23:51.820429Z",
+      "entry_id": "mem_ent_8440e1be50ef4d3ca49490b890512e2e",
+      "entry_version_id": "mem_ver_afa993a5870349deb5d6c4efaa4620ec",
+      "id": "experiment-08dc96",
+      "next_step": "确认最新保存优先（2d6d628b）",
+      "ordinal": 1,
+      "progress": "在不可解析记录之后保存（2d6d628b）",
+      "saved_at": "2026-10-30T03:23:51.899597Z",
+      "scope_id": "scp_704g7jrnyz3f3ba99yjk0eswes",
+      "scope_origin": "created",
+      "title": "不可解析锚点记录验收"
+    },
+    "experiment-2ef386": {
+      "created_at": "2026-10-30T03:23:51.634128Z",
+      "entry_id": "mem_ent_cfc51e3d5bee47179645ae7359608362",
+      "entry_version_id": "mem_ver_23c2d0d855e348ed850fcfb1dfbf4d9d",
+      "id": "experiment-2ef386",
+      "next_step": "新格式下一步（94952bf8）",
+      "ordinal": 4,
+      "progress": "新格式覆盖旧记录（94952bf8）；下一步：仍保持原样",
+      "saved_at": "2026-10-30T03:23:51.711174Z",
+      "scope_id": "scp_5xwjn3nae6xe0r08epwjn549ey",
+      "scope_origin": "created",
+      "title": "历史编码兼容验收"
+    },
+    "experiment-574a22": {
+      "created_at": "2026-10-30T03:23:51.448330Z",
+      "entry_id": "mem_ent_45af91495b974ae6aa67613c833f6877",
+      "entry_version_id": "mem_ver_60b12b037fa047ff8f55d35baa4a488e",
+      "id": "experiment-574a22",
+      "next_step": "核对说明；下一步：重新测量（61b11483）",
+      "ordinal": 1,
+      "progress": "完成基础测量（61b11483）",
+      "saved_at": "2026-10-30T03:23:51.450580Z",
+      "scope_id": "scp_655w26zfvdt8djgpep2bk8wp3n",
+      "scope_origin": "created",
+      "title": "文本往返验收 中文分号"
+    }
+  },
+  "version": 1
+}

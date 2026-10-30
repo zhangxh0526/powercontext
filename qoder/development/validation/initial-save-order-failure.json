@@ -1,0 +1,69 @@
+{
+  "cases": [
+    {
+      "expected": "SECOND",
+      "actual": "FIRST",
+      "first_saved_at": "2026-10-30T02:40:19Z",
+      "second_saved_at": "2026-10-30T02:40:19Z",
+      "first_entry": "mem_ent_c5b77f1b44354318ad86e911eb328d72",
+      "second_entry": "mem_ent_0b7f4be76f8245009304d6e875e53c81"
+    },
+    {
+      "expected": "SECOND",
+      "actual": "SECOND",
+      "first_saved_at": "2026-10-30T02:40:19Z",
+      "second_saved_at": "2026-10-30T02:40:19Z",
+      "first_entry": "mem_ent_1316f02b1d5748c0be04dd5aaf7eea76",
+      "second_entry": "mem_ent_27d886f5e80c4fb7ad11afe036816fd2"
+    },
+    {
+      "expected": "SECOND",
+      "actual": "SECOND",
+      "first_saved_at": "2026-10-30T02:40:19Z",
+      "second_saved_at": "2026-10-30T02:40:19Z",
+      "first_entry": "mem_ent_1a2781627b5440679c025e4afd2c7f32",
+      "second_entry": "mem_ent_60d1d878b51d4915a56b899dc274a071"
+    },
+    {
+      "expected": "SECOND",
+      "actual": "SECOND",
+      "first_saved_at": "2026-10-30T02:40:19Z",
+      "second_saved_at": "2026-10-30T02:40:19Z",
+      "first_entry": "mem_ent_6dcd14dd924e4bb7879e890f536eef27",
+      "second_entry": "mem_ent_bcd945ed89e54ce3b3d3ff6a47bf8bfa"
+    },
+    {
+      "expected": "SECOND",
+      "actual": "FIRST",
+      "first_saved_at": "2026-10-30T02:40:19Z",
+      "second_saved_at": "2026-10-30T02:40:19Z",
+      "first_entry": "mem_ent_e80a5590f9e54ee1ae451bea5934f41f",
+      "second_entry": "mem_ent_a3a1688d58f243118a15564af19fd3c5"
+    },
+    {
+      "expected": "SECOND",
+      "actual": "FIRST",
+      "first_saved_at": "2026-10-30T02:40:19Z",
+      "second_saved_at": "2026-10-30T02:40:19Z",
+      "first_entry": "mem_ent_11270a8a8fff409bb71438cb434d24b2",
+      "second_entry": "mem_ent_04668414596e4c4980ee369e75f76318"
+    },
+    {
+      "expected": "SECOND",
+      "actual": "SECOND",
+      "first_saved_at": "2026-10-30T02:40:19Z",
+      "second_saved_at": "2026-10-30T02:40:19Z",
+      "first_entry": "mem_ent_090a30c8fe964e318a31373ff3282332",
+      "second_entry": "mem_ent_fb31c34b36724b458a247b7fce37b3e1"
+    },
+    {
+      "expected": "SECOND",
+      "actual": "FIRST",
+      "first_saved_at": "2026-10-30T02:40:19Z",
+      "second_saved_at": "2026-10-30T02:40:19Z",
+      "first_entry": "mem_ent_afcb8248955a4540941d0c278a65d57b",
+      "second_entry": "mem_ent_57dd94b2188042dda48cb3ec15ad6586"
+    }
+  ],
+  "failures": 4
+}

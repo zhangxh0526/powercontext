@@ -1,0 +1,18 @@
+科研实验续作助手已启动：http://127.0.0.1:60031
+PowerContext：http://127.0.0.1:18081（token 未配置）
+实验 Scope 映射：/home/legend/seekdb-competition/qoder/evidence/text-roundtrip-20261030T030936Z/runtime-data/experiments.json
+127.0.0.1 - - [30/Oct/2026 12:09:37] "GET /api/health HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 12:09:37] "POST /api/experiments HTTP/1.1" 201 -
+127.0.0.1 - - [30/Oct/2026 12:09:37] "POST /api/experiments/experiment-321b22/save HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 12:09:37] "POST /api/experiments/experiment-321b22/recall HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 12:09:37] "POST /api/experiments HTTP/1.1" 201 -
+127.0.0.1 - - [30/Oct/2026 12:09:37] "POST /api/experiments/b-b-2a2aaf-30d6d3/save HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 12:09:37] "POST /api/experiments/b-b-2a2aaf-30d6d3/recall HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 12:09:37] "POST /api/experiments HTTP/1.1" 201 -
+127.0.0.1 - - [30/Oct/2026 12:09:37] "POST /api/experiments/experiment-f82779/recall HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 12:09:37] "POST /api/experiments/experiment-f82779/save HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 12:09:37] "POST /api/experiments/experiment-f82779/recall HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 12:09:37] "POST /api/experiments HTTP/1.1" 201 -
+127.0.0.1 - - [30/Oct/2026 12:09:37] "POST /api/experiments/experiment-6bbfb6/recall HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 12:09:37] "POST /api/experiments/experiment-6bbfb6/save HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 12:09:37] "POST /api/experiments/experiment-6bbfb6/recall HTTP/1.1" 200 -

@@ -1,0 +1,20 @@
+# 本地配置与凭据：绝不提交
+.env
+*.local.env
+
+# 运行期数据：实验与 Scope 映射、进程 pid 与日志
+data/
+runtime/
+
+# 注意：evidence/ 不在忽略之列，真实请求与响应记录是评审材料，需要随仓库提交。
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# 编辑器与系统
+.DS_Store
+.idea/
+.vscode/

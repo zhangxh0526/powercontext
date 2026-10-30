@@ -1,0 +1,31 @@
+{
+  "experiments": {
+    "a-rdma-3b0b98": {
+      "id": "a-rdma-3b0b98",
+      "title": "验收实验A RDMA 尾延迟",
+      "scope_id": "scp_1c51td84k30cxrkcprwegjt1z6",
+      "created_at": "2026-10-30T03:21:45.496280Z",
+      "scope_origin": "created",
+      "progress": "",
+      "next_step": "",
+      "saved_at": "",
+      "ordinal": 0,
+      "entry_id": "",
+      "entry_version_id": ""
+    },
+    "b-15f709": {
+      "created_at": "2026-10-30T03:21:45.605197Z",
+      "entry_id": "mem_ent_bfa85a5f4101454c9ffb2e1d9d9e4697",
+      "entry_version_id": "mem_ver_06372afdde8745a38938a51e9719ca3a",
+      "id": "b-15f709",
+      "next_step": "调整 page size 到 16KB 后复测 IOPS-7c11。",
+      "ordinal": 1,
+      "progress": "冷启动写入首轮完成，用 IOPS-7c11 标记写入放大 3.2 倍。",
+      "saved_at": "2026-10-30T03:21:45.607218Z",
+      "scope_id": "scp_7mq0c3s919bbb3y82rzerhasyf",
+      "scope_origin": "created",
+      "title": "验收实验B 冷启动写入"
+    }
+  },
+  "version": 1
+}

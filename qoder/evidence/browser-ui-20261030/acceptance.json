@@ -1,0 +1,19 @@
+{
+  "date": "2026-10-30",
+  "timezone": "Asia/Shanghai",
+  "environment": "Actual Chrome page through a private SSH forward to the Linux application",
+  "scope_id": "scp_4rffe0zhsf0va4aeja0ddq4bdq",
+  "experiment": "RDMA 页面验收实验",
+  "checks": {
+    "empty_scope_displayed_no_memory": true,
+    "page_save_and_recall": true,
+    "html_tags_displayed_literally": true,
+    "delimiters_and_quotes_preserved": true,
+    "app_process_restarted": true,
+    "restarted_page_restored_same_scope_and_entry": true
+  },
+  "restored_entry_id": "mem_ent_52594825f08042b38a75430ce8af88a9",
+  "restored_entry_version_id": "mem_ver_6c284b117a804794b5ce128f1a9f94be",
+  "restored_progress": "已比较 4KB 与 64KB 消息；备注 <b>原样文本</b> 和 \"控制组A\"。",
+  "restored_next_step": "核对说明；下一步：固定线程数并重新测量 P99 延迟。"
+}

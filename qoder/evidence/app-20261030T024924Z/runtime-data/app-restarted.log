@@ -1,0 +1,7 @@
+科研实验续作助手已启动：http://127.0.0.1:39525
+PowerContext：http://127.0.0.1:18081（token 未配置）
+实验 Scope 映射：/home/legend/seekdb-competition/qoder/evidence/app-20261030T024924Z/runtime-data/experiments.json
+127.0.0.1 - - [30/Oct/2026 11:49:25] "GET /api/health HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 11:49:25] "GET /api/experiments HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 11:49:25] "POST /api/experiments/a-rdma-79b09d/recall HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 11:49:25] "POST /api/experiments/a-rdma-79b09d/recall HTTP/1.1" 502 -
