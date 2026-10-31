@@ -1,0 +1,9 @@
+{
+  "doc_id": "spec-status",
+  "kind": "spec",
+  "revision": 1,
+  "title": "状态接口规格",
+  "content": "normalize_status 仅接受 ready、in_progress、done、failed。输入统一小写与下划线，未知值抛出 ValueError。",
+  "source_path": "samples/spec_v1.json",
+  "keywords": ["status", "normalize_status", "状态", "spec"]
+}
